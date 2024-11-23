@@ -1,0 +1,44 @@
+
+    <div class="wrapper sunday-modal-content">
+        <form>
+            <div class="input-container">
+                <input type="text" class="label-input" id="label-input" name="label" required placeholder=" ">
+                <label for="label-input">Enter a label</label>
+                <input type="datetime-local" name = "start_time">
+                <input type = "datetime-local" name = "end_time">
+                <button class="add-button" id = "addButton" type = "button" onclick = "add_task()">Add</button>
+            </div>
+            <div class="container">
+                <div class="left-column">
+                    <div class="rectangle" contenteditable="false" data-task-id="1">Task 1</div>
+                    <div class="rectangle" contenteditable="false" data-task-id="2">Task 2</div>
+                    <div class="rectangle" contenteditable="false" data-task-id="3">Task 3</div>
+                    <div class="rectangle" contenteditable="false" data-task-id="4">Task 4</div>
+                    <div class="rectangle" contenteditable="false" data-task-id="5">Task 5</div>
+                    <div class="plus-button"></div>
+                    <button class="edit-button">Edit</button>
+                </div>
+                <div class="right-column">
+                    
+                    <div class="btn-group" role="group" aria-label="Radio button group">
+                        <input type="radio" class="btn-check" id="option1" name="options" value="1" autocomplete="off" checked>
+                        <label class="btn btn-primary" for="option1">Option 1</label>
+                    
+                        <input type="radio" class="btn-check" id="option2" name="options" value="2" autocomplete="off">
+                        <label class="btn btn-primary" for="option2">Option 2</label>
+                    
+                        <input type="radio" class="btn-check" id="option3" name="options" value="3" autocomplete="off">
+                        <label class="btn btn-primary" for="option3">Option 3</label>
+                    </div>
+                    
+                </div>
+            </div>
+            <div class="input-container">
+                <input type="text" class="reminder-box" id="reminder-box" required placeholder=" ">
+                <label for="reminder-box">Enter a reminder</label>
+            </div>
+            <button class="add-button">Add</button>
+        </form>
+    </div>
+
+
