@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Page</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/login.css') }}">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.4/gsap.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <div class="left-content">
+            <h1 id="welcome">Welcome to <span class="gradient-text">Jelly</span></h1>
+        </div>
+        <div class="right-content">
+            <h5>Sign In</h5>
+            <form action="{{ url_for('login') }}" method="post">
+                <div class="input-container">
+                    <label for="username">Username:</label>
+                    <input type="text" id="username" name="username" placeholder="username" required>
+                </div>
+                <div class="input-container">
+                    <label for="password">Password:</label>
+                    <input type="password" id="password" name="password" placeholder="password" required>
+                </div>
+                <input type="submit" value="Login">
+            </form>
+            <div class="or-container">
+                <hr><span>OR</span><hr>
+            </div>
+            <h5>Don't have an account? <a href="{{ url_for('signup') }}">Sign Up</a></h5>
+        </div>
+    </div>
+
+    <script>
+        // GSAP animations for the login page
+        gsap.from("#welcome", {duration: 1, y: -50, opacity: 0, ease: "power3.out"});
+        gsap.from("h5", {duration: 1, y: 50, opacity: 0, delay: 0.5, stagger: 0.2, ease: "power3.out"});
+        gsap.from("form", {duration: 1, scale: 0.5, opacity: 0, delay: 1, ease: "back.out"});
+
+        gsap.from("label", {
+            scrollTrigger: {
+                trigger: "label",
+                start: "top 80%",
+                end: "top 60%",
+                scrub: true
+            },
+            y: 100,
+            opacity: 0
+        });
+
+        gsap.from("input[type='text'], input[type='password']", {
+            scrollTrigger: {
+                trigger: "input",
+                start: "top 80%",
+                end: "top 60%",
+                scrub: true
+            },
+            y: 100,
+            opacity: 0
+        });
+
+        gsap.from("input[type='submit']", {
+            scrollTrigger: {
+                trigger: "input[type='submit']",
+                start: "top 80%",
+                end: "top 60%",
+                scrub: true
+            },
+            y: 100,
+            opacity: 0
+        });
+
+        // JavaScript for input label animation
+        const inputs = document.querySelectorAll(".input-container input");
+        inputs.forEach(input => {
+            input.addEventListener("focus", () => {
+                input.previousElementSibling.classList.add("active");
+            });
+            input.addEventListener("blur", () => {
+                if (input.value === "") {
+                    input.previousElementSibling.classList.remove("active");
+                }
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,319 @@
+body, html {
+    height: 100vh;
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-width: 100vw;
+    background-color: #1a1a1a; /* Change to your desired background color */
+}
+
+.schedule-row {
+    width: 100%;
+    min-width: 1000px;
+}
+
+.schedule-wrapper {
+    width: 95%;
+    margin: auto;
+    overflow: scroll-x;
+}
+
+.col{
+    overflow:visible;
+    display:flex;
+    flex-direction: column;
+}
+
+.column {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 0 10px;
+}
+
+.weekdays {
+    display: flex;
+    justify-content: center;
+    box-shadow: inset 0 0 0 3000px rgba(0, 0, 0, 0.085);
+    border: 1px solid transparent;
+    color: white;
+    padding: 10px 0;
+    width: 100%;
+    box-sizing: border-box;
+    border-radius: 10px;
+    background-color: #333; /* Change the background color for weekdays */
+}
+
+.wrapper {
+    height: 600px;
+    background: inherit;
+    border-radius: 10px;
+    box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.2), 0 3px 10px 0 rgba(0, 0, 0, 0.19);
+    position: relative;
+    overflow: visible;
+    margin-top: 10px;
+    background-color: #222; /* Change the background color for the wrapper */
+}
+
+.wrapper:before {
+    position: relative;
+    content: '';
+    background: inherit;
+    height: 580px;
+    width: 200px;
+    right: 0;
+    top: -25px;
+    bottom: 0;
+    box-shadow: inset 0 0 0 3000px rgba(150, 150, 150, 0.192);
+    filter: blur(5px);
+    border: 1px solid rgba(43, 43, 43, 0.568);
+    border-radius: 15px;
+    margin-bottom: 100px;
+}
+
+.content {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: black;
+    display:flex;
+    overflow: visible;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    align-items: center;
+}
+
+#openModalBtn{
+    background-color: rgb(56, 21, 230);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 75px; /* Circle diameter */
+    height: 75px; /* Circle diameter */
+    font-size: 50px;
+    font-weight:100;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2); /* Optional shadow */
+    position: fixed; /* Fix to the viewport */
+    bottom: 50px; /* Distance from the bottom */
+    right: 50px; /* Distance from the right */
+    z-index: 10; /* Ensure it stays on top */
+}
+
+#openModalBtn:hover {
+    background-color: rgb(70, 39, 224);
+}
+
+
+.image-button {
+    border: none;
+    padding: 0;
+    margin-top: 600px;
+    position: absolute;
+    top: 25px;
+    left: 75px;
+    background: none;
+    cursor: pointer;
+    background-image: url('https://cdn-icons-png.flaticon.com/512/32/32339.png');
+    background-size: cover;
+    width: 50px;
+    height: 50px;
+}
+
+.smallDiv {
+    width: 50px;
+    height: 50px;
+    display:flex;
+    flex-direction: column;
+    background-color: blue;
+    margin: 10px;
+    border-radius: 10px;
+    transition: all 0.1s ease;
+    background-color: #333; /* Change background color for smallDiv */
+    overflow: hidden;
+    background-color: #f2f2f2;
+    padding: 0 20px;
+    font-size:10px;
+    cursor:pointer;
+    box-shadow: 0 0 3px 0 #00000012;
+}
+
+.smallDiv:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 5px 0 #00000012;
+}
+
+.smallDiv.expanded {
+    height: 100px; /* Adjust to the desired expanded height */
+    width:150px;
+    transform: scale(1.5);
+    padding: 20px;
+}
+
+.smallDiv div {
+    display:none;
+    pointer-events: none;
+}
+
+.smallDiv.expanded div {
+    display:block;
+}
+
+.weekdays {
+    display: flex;
+    justify-content: center;
+    background-color: #444; /* Change background color for weekdays */
+    color: white;
+    padding: 10px 0;
+    margin-top: 20px;
+}
+
+.wrapper {
+    margin-top: 10px;
+}
+
+.modal {
+    display: none; /* Hidden by default */
+    position: fixed;
+    z-index: 1;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.4); /* Black background with opacity */
+}
+
+.modal-content {
+    position: absolute;
+    background-color: #fefefe;
+    margin: auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 40%;
+    min-width: 300px;
+    top: 50px; /* Set a specific distance from the top */
+    resize: both; /* Allow resizing */
+    overflow: auto; /* Add scroll if needed */
+}
+
+.close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.main-container {
+    display: flex;
+    height: calc(100vh - 50px);
+    width: calc(100vw - 50px);
+    gap: 15px; /* 15px distance between sidebar and main content */
+    box-sizing: border-box;
+}
+
+/* Sidebar */
+.side-menu {
+    background-color: rgba(255, 198, 76, 0.85);
+    width: 250px;
+    border-radius: 15px;
+    overflow-x: hidden;
+    padding-top: 60px;
+    padding-left: 15px;
+    padding-right: 15px;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.5);
+}
+
+/* Links inside the sidebar */
+.side-menu a {
+    padding: 15px 0;
+    text-decoration: none;
+    font-size: 24px;
+    color: #fff;
+    display: block;
+    border-radius: 5px;
+}
+
+.side-menu a:hover {
+    color: rgb(56, 21, 230);
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Button to open/close the sidebar (fixed in place) */
+.toggle-btn {
+    font-size: 24px;
+    font-weight: bold;
+    cursor: pointer;
+    color: #fff;
+    padding: 10px 15px;
+    border-radius: 10px;
+    background-color: rgb(62, 79, 226);
+    position: fixed; /* Fix the button in place */
+    top: 30px;
+    left: 30px;
+    z-index: 3;
+}
+
+/* Main content area */
+.main-content {
+    flex-grow: 1; /* Fill remaining space */
+    background-color: #121212; /* Main content background color */
+    border-radius: 15px;
+    padding: 30px;
+    color: #fff;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+}
+
+@media (max-width: 768px) {
+    .side-menu a {
+        font-size: 20px;
+    }
+
+    .toggle-btn {
+        font-size: 20px;
+    }
+}
+
+.radio-group {
+    display: flex;
+    gap: 10px;
+}
+
+.radio-group input[type="radio"] {
+    display: none; /* Hide the native radio button */
+}
+
+.radio-group label {
+    display: inline-block;
+    padding: 10px 20px;
+    border: 2px solid #007BFF;
+    border-radius: 5px;
+    background-color: white;
+    color: #007BFF;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.radio-group input[type="radio"]:checked + label {
+    background-color: #007BFF;
+    color: white;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+}
+
+.radio-group label:hover {
+    background-color: #0056b3;
+    color: white;
+}
+
+
