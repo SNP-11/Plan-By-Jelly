@@ -1,17 +1,25 @@
-const color_dict = {
-    "Very Urgent": "rgb(255,0,0)",
-    "Urgent": "#ffcc00",
-    "Not Urgent": "#00ff00"
-}
 let clickTimeout = null;
 let isDblClick = false;
-
-
 
 function loadE(elem){
     let start = parseInt(elem.dataset.start_time);
     let end = parseInt(elem.dataset.end_time);
 
+      elem.addEventListener('mouseenter', function() {
+        console.log('Mouse entered:', this);
+        const wrapper = this.closest('.wrapper');
+        if (wrapper) {
+          wrapper.style.zIndex = '1';
+        }
+      });
+  
+      elem.addEventListener('mouseleave', function() {
+        console.log('Mouse left:', this);
+        const wrapper = this.closest('.wrapper');
+        if (wrapper) {
+          wrapper.style.zIndex = '0';
+        }
+      });
    
 
     const label = document.createElement('div');
@@ -33,7 +41,6 @@ function loadE(elem){
     urgent.classList.add("urgency");
     urgent.textContent= elem.dataset.urgency;
     elem.appendChild(urgent);
-    elem.style.background = color_dict[elem.dataset.urgency];
 }
 
 function clickDiv(event){
@@ -42,7 +49,7 @@ function clickDiv(event){
             const elem = event.srcElement;
             toggleDiv(elem);
             isDblClick = false;}
-    }, 200);
+    }, 0);
 }
 
 function dblClickDiv(event) {
@@ -63,6 +70,7 @@ function dblClickDiv(event) {
     $("#start_time").val(start);
     $("#end_time").val(end);
     $("#urgency").val(elem.dataset.urgency);
+    toggleDiv(elem);
 }
 
 // function convertUnixToReadable(unixTimestamp) {
@@ -120,7 +128,6 @@ function openTaskM() {
 function closeTaskModal() {
     document.getElementById("myModal").style.display = "none";
 };
-
 
 // newTaskDiv.setAttribute('data-id', date.id);
 //                 newTaskDiv.setAttribute('data-uid', date.uid);

@@ -7,6 +7,7 @@
       <link rel="stylesheet" href="{{ url_for('static', filename='css/sunday.css') }}">
       <!-- <script src="{{ url_for('static', filename='js/modal.js') }}"></script> -->
       <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+      <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=close" />
       <link rel="preconnect" href="https://fonts.googleapis.com">
       <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
       <link
@@ -39,22 +40,33 @@
                         <button id="openModalBtn" class="material-icons text-black">add</button>
                         <div id="myModal" class="modal">
                           <div id="modalContent" class="modal-content">
-                              <span id="closeBtn" class="close" style = "width:fit-content">&times;</span>
                               <div id="modalBody">
+                                <div class = "row">
+                                    <div class = "col-4">
+                                        <select id = "urgency" class="form-select">
+                                            <option>Very Urgent</option>
+                                            <option>Urgent</option>
+                                            <option>Not Urgent</option>
+                                        </select>
+                                    </div>
+                                    <div class = "col-7">
+                                        <input type="text" class="label-input form-control" id="label-input" name="label" required placeholder="title">
+                                    </div>
+                                    <div class = "col-1">
+                                        <span id="closeBtn" class="close" style = "width:fit-content"><span class="material-symbols-outlined">
+                                            close
+                                            </span></span>
+                                    </div>
+                                </div>
                                 <div class="wrapper sunday-modal-content">
+                                    
                                     <div class="input-container">
-                                        <form>
-                                            <input type="text" class="label-input" id="label-input" name="label" required placeholder=" ">
-                                            <label for="label-input">Enter a label</label>
-                                            <input type="datetime-local" id  = "start_time" name = "start_time">
-                                            <input type = "datetime-local" id  = "end_time" name = "end_time">
-                                            <select id = "urgency">
-                                                <option>Very Urgent</option>
-                                                <option>Urgent</option>
-                                                <option>Not Urgent</option>
-                                            </select>
+                                        <div class="input-group">
+                                            <input type="datetime-local" id  = "start_time" name = "start_time" class="form-control">
+                                            <input type = "datetime-local" id  = "end_time" name = "end_time" class = "form-control">
+                
                                             <button class="add-button" id = "addButton" type = "button">Add</button>
-                                        </form>
+                                        </div>
                                     </div>
                                     <div class="container">
                                         <div class="left-column">
