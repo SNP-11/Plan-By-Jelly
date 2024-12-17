@@ -26,30 +26,29 @@ def get_db_connection():
 @app.route('/create_db')
 def create_db():
     conn = get_db_connection()
-    # conn.execute('''\
-    #              CREATE TABLE tasks (
-    #              `id` int(11) NOT NULL,
-    #              `uid` int(11) NOT NULL,   
-    #              `label` varchar(8) NOT NULL,
-    #              `start_time` int(12) NOT NULL,
-    #              `end_time` int(12) DEFAULT NULL,
-    #              `urgency` varchar(12) NOT NULL
-    #              );\
-    #              ''')
-    # conn.execute('''\
-    #              CREATE TABLE users (
-    #              `id` int(11) NOT NULL,
-    #              `username` varchar(8) NOT NULL,
-    #              `password` varchar(8) NOT NULL
-    #              );\
-    #              ''')
-
+    # conn.execute('DROP TABLE tasks')
+    # conn.execute('DROP TABLE users')
     conn.execute('''\
-                ALTER TABLE tasks ADD COLUMN urgency VARCHAR(80);
+                 CREATE TABLE users (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    username TEXT NOT NULL UNIQUE,
+                    password TEXT NOT NULL
+                 );\
                  ''')
-    # 1) git managment   DONE
-    # 2) use alter
+    conn.execute('''\
+                 CREATE TABLE tasks (
+                    id INTEGER NOT NULL, 
+                    uid INTEGER NOT NULL, 
+                    label VARCHAR(80) NOT NULL, 
+                    start_time INTEGER NOT NULL, 
+                    end_time INTEGER, urgency VARCHAR(80), 
+                    PRIMARY KEY (id)
+                 );\
+                 ''')
+    
 
+    # 1) git managment
+    # 2) use alter
     conn.close()
     return render_template('loginG.html')
 
@@ -228,9 +227,10 @@ def add_task():
     end_time = request.form.get('end_time')
     uid = session["uid"]
     urgency = request.form.get('urgency')
+    saveTask = request.form.get('saveTask')
 
     # Add the task and get the task data
-    task_data = task_controller.add_task(uid, label, start_time, end_time, urgency)
+    task_data = task_controller.add_task(uid, label, start_time, end_time, urgency, saveTask)
     
     # Prepare the response
     response = task_data

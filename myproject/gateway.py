@@ -23,23 +23,28 @@ def get_db_connection():
 @app.route('/create_db')
 def create_db():
     conn = get_db_connection()
+    conn.execute('DROP TABLE tasks')
+    conn.execute('DROP TABLE users')
+    conn.execute('DROP CONSTRAINT uid')
     conn.execute('''\
-                 CREATE TABLE tasks (
-                 `id` int(11) NOT NULL,
-                 `uid` int(11) NOT NULL,   
-                 `label` varchar(8) NOT NULL,
-                 `start_time` int(12) NOT NULL,
-                 `end_time` int(12) DEFAULT NULL,
-                 `urgency` varchar(12) NOT NULL
+                 CREATE TABLE users (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    username TEXT NOT NULL UNIQUE,
+                    password TEXT NOT NULL
+                 )
                  );\
                  ''')
-    # conn.execute('''\
-    #              CREATE TABLE users (
-    #              `id` int(11) NOT NULL,
-    #              `username` varchar(8) NOT NULL,
-    #              `password` varchar(8) NOT NULL
-    #              );\
-    #              ''')
+    conn.execute('''\
+                 CREATE TABLE tasks (
+                    id INTEGER NOT NULL, 
+                    uid INTEGER NOT NULL, 
+                    label VARCHAR(80) NOT NULL, 
+                    start_time INTEGER NOT NULL, 
+                    end_time INTEGER, urgency VARCHAR(80), 
+                    PRIMARY KEY (id)
+                 );\
+                 ''')
+    
 
     # 1) git managment
     # 2) use alter
@@ -50,8 +55,8 @@ def create_db():
 
 @app.route('/')
 def index():
-    #db.drop_all()
-    #db.create_all()
+    # db.drop_all()
+    db.create_all()
     if 'username' in session:
         return redirect(url_for('home'))
     return render_template('loginG.html')

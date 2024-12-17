@@ -9,6 +9,7 @@ class Tasks(db.Model):
     start_time = db.Column(db.BigInteger, nullable=False)  # Store as Unix timestamp (int)
     end_time = db.Column(db.BigInteger)  # Store as Unix timestamp (int)
     urgency = db.Column(db.String(80), nullable = False)
+    saveTask = db.Column(db.Boolean(), nullable = True)
 
     def to_dict(self):
         return {
@@ -17,7 +18,8 @@ class Tasks(db.Model):
             "label": self.label,
             "start_time": self.start_time if self.start_time is not None else 0,  # Return 0 if None
             "end_time": self.end_time if self.end_time is not None else 0,  # Return 0 if None
-            "urgency" : self.urgency
+            "urgency" : self.urgency,
+            "saveTask" : self.saveTask
         }
 
     def to_json(self):
