@@ -195,12 +195,21 @@ document.addEventListener('DOMContentLoaded', function() {
         url: "/get_tasks",
         success: function(data) {
             console.log(data); 
-            
-            data.forEach((task, index)=>{
+            tasks = data;
+            data.forEach((task, i)=>{
                 add_taskDiv(task);
+                calculateTaskDuration(task, i);
             });
         }
     });
+
+    function calculateTaskDuration(task, i){
+        let start = parseInt(task.start_time);
+        let end = parseInt(task.end_time);
+        let duration = end-start;
+        tasks[i].duration = duration;
+
+    }
 
     function add_taskDiv(date){
         let start = parseInt(date.start_time);

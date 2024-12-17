@@ -1,3 +1,7 @@
+:root{
+    --default-bg:#2a2a2a;
+}
+
 body, html {
     height: 100vh;
     margin: 0;
@@ -329,9 +333,37 @@ body, html {
 }
 
 .form-control, .form-select{
-    background-color:#2a2a2a;
+    background-color: var(--default-bg);
     color:white;
 }
 .form-control::placeholder{
     color:#ccc;
+}
+
+.label{
+    font-size: 15px;
+    font-style: bold;
+}
+
+.accordion{
+    border-radius: 7px;
+    /* padding: 8px 12px; */
+    margin: 10px 0px;  
+}
+
+h2.accordion-header{
+    font-weight: bold;
+}
+.accordion, 
+.accordion-item,
+.accordion-button,
+.accordion-button:not(.collapsed){
+    background-color:  var(--default-bg);
+    color:white;
+    box-shadow: none;
+    outline:none;
+}
+
+.accordion-button::after {
+    filter:saturate(0);
 }
