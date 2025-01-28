@@ -28,20 +28,12 @@ document.addEventListener('DOMContentLoaded', function() {
             label: $("input['label']"),
             start_time: $("input['start_time']"),
             end_time: $("input['end_time']"),
+            urgency: $("select#urgency"),
+            save_task: $("input#save_task").is(":checked") == True ? 1 : 0
         }, function(response){
             alert(response)
         });
     });
-
-    // function add_task(){
-    //     $.post('add_task', {
-    //         label: $("input[name='label']"),
-    //         start_time: $("input[name='start_time']"),
-    //         end_time: $("input[name='end_time']"),
-    //     }, function(response){
-    //         alert(response)
-    //     });
-    // }
 
     // Toggle edit mode
     editButton.addEventListener('click', () => {

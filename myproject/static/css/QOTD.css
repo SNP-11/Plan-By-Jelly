@@ -1,0 +1,79 @@
+/* General Styles */
+body {
+    font-family: 'Poppins', sans-serif;
+    background-color: #1a1a1a;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+  }
+  .modal{
+    top:0;
+  }
+  .open-modal-btn {
+    font-family: 'Poppins', sans-serif;
+    font-size: 1.2rem;
+    padding: 10px 20px;
+    background-color: #3149cf;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.1);
+    transition: background-color 0.3s;
+  }
+  
+  .open-modal-btn:hover {
+    background-color: #5f38fb;
+  }
+  
+  /* Modal Styles */
+  .modal-content {
+    background-color: white;
+    background-size: cover; /* Make the image cover the entire modal */
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    margin: auto;
+    color: #fff; /* Ensure the text remains readable */
+    position: relative; /* Keep text above the image */
+    width: 1400px;
+    height: 348px;
+ }
+
+  
+  .modal.hidden {
+    display: none;
+  }
+  
+  
+  .close-btn {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #555;
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    cursor: pointer;
+    transition: color 0.3s;
+  }
+  
+  .close-btn:hover {
+    color: #333;
+  }
+  
+  .quote-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 2rem;
+    margin-bottom: 10px;
+    color: #5a4a3a;
+  }
+  
+  .quote-text {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.5rem;
+    color: #3a2f23;
+    margin-top: 0;
+  }
+  

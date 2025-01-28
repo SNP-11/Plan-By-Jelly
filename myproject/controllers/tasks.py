@@ -8,14 +8,14 @@ class TaskController:
     def __init__(self):
         pass
 
-    def add_task(self, uid, label, start_time, end_time, urgency, saveTask):
+    def add_task(self, uid, label, start_time, end_time, urgency, save_task):
         # # Convert to Unix timestamp if they are strings
         # if isinstance(start_time, str):
         #     start_time = int(datetime.fromisoformat(start_time).timestamp())
         # if isinstance(end_time, str):
         #     end_time = int(datetime.fromisoformat(end_time).timestamp())
         
-        new_task = Tasks(uid=uid, label=label, start_time=start_time, end_time=end_time, urgency = urgency, saveTask = saveTask)
+        new_task = Tasks(uid=uid, label=label, start_time=start_time, end_time=end_time, urgency = urgency, save_task = save_task)
         db.session.add(new_task)
         db.session.commit()
         # return jsonify(new_task)

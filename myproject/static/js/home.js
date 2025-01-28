@@ -164,6 +164,8 @@ document.addEventListener('DOMContentLoaded', function() {
             label: $("input[name = 'label']").val(),
             start_time: start_time,
             end_time: end_time,
+            urgency: $("select#urgency").val(),
+            save_task: $("input#save_task").is(":checked") == true ? 1 : 0
         }, function(response){
             alert(response);
         });
@@ -194,12 +196,21 @@ document.addEventListener('DOMContentLoaded', function() {
         url: "/get_tasks",
         success: function(data) {
             console.log(data); 
-            
-            data.forEach((task, index)=>{
+            tasks = data;
+            data.forEach((task, i)=>{
                 add_taskDiv(task);
+                calculateTaskDuration(task, i);
             });
         }
     });
+
+    function calculateTaskDuration(task, i){
+        let start = parseInt(task.start_time);
+        let end = parseInt(task.end_time);
+        let duration = end-start;
+        tasks[i].duration = duration;
+
+    }
 
     function add_taskDiv(date){
         let start = parseInt(date.start_time);
@@ -219,10 +230,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 newTaskDiv.setAttribute('data-label', date.label);
                 newTaskDiv.setAttribute('data-start_time', date.start_time);
                 newTaskDiv.setAttribute('data-end_time', date.end_time);
+                newTaskDiv.setAttribute('data-urgency', date.urgency);
                 // newTaskDiv.innerText = start.toLocaleString() + " ~ " + end.toLocaleString();
-                newTaskDiv.addEventListener("mouseover", (event) => hoverE(event));
-                newTaskDiv.addEventListener("mouseleave", (event) => hoverE(event));
-                newTaskDiv.addEventListener('click', (event) => clickDiv(event));
+                newTaskDiv.addEventListener("mouseenter", (event) => clickDiv(event));
+                newTaskDiv.addEventListener("mouseleave", (event) => clickDiv(event));
+                newTaskDiv.addEventListener('click', (event) => dblClickDiv(event));
                 loadE(newTaskDiv);
                 $(this).append(newTaskDiv);
             }

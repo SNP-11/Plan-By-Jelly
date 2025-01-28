@@ -8,6 +8,10 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from controllers.tasks import TaskController
 from db_config import db, app, render_template, request, redirect, url_for, flash, session, jsonify
 
+
+@app.route('/QOTD')
+def QOTD():
+    return render_template('QOTD.html')
 # app = Flask(__name__)
 # app.config.from_object(Config)
 # db = SQLAlchemy()
@@ -23,15 +27,14 @@ def get_db_connection():
 @app.route('/create_db')
 def create_db():
     conn = get_db_connection()
-    conn.execute('DROP TABLE tasks')
-    conn.execute('DROP TABLE users')
-    conn.execute('DROP CONSTRAINT uid')
+    # conn.execute('DROP TABLE tasks')
+    # conn.execute('DROP TABLE users')
+    # conn.execute('DROP CONSTRAINT uid')
     conn.execute('''\
                  CREATE TABLE users (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     username TEXT NOT NULL UNIQUE,
                     password TEXT NOT NULL
-                 )
                  );\
                  ''')
     conn.execute('''\
@@ -40,7 +43,9 @@ def create_db():
                     uid INTEGER NOT NULL, 
                     label VARCHAR(80) NOT NULL, 
                     start_time INTEGER NOT NULL, 
-                    end_time INTEGER, urgency VARCHAR(80), 
+                    end_time INTEGER,
+                    urgency VARCHAR(30) NOT NULL,
+                    save_task INTEGER NOT NULL,
                     PRIMARY KEY (id)
                  );\
                  ''')
@@ -142,9 +147,10 @@ def add_task():
     end_time = request.form.get('end_time')
     uid = session["uid"]
     urgency = request.form.get('urgency')
+    save_task = request.form.get('save_task')
 
     # Add the task and get the task data
-    task_data = task_controller.add_task(uid, label, start_time, end_time, urgency)
+    task_data = task_controller.add_task(uid, label, start_time, end_time, urgency, save_task)
     
     # Prepare the response
     response = task_data
