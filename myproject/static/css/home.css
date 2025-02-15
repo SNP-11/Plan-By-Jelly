@@ -146,6 +146,7 @@ body, html {
     width:200px;
     /* transform: scale(1.5); */
     padding: 20px;
+    font-size:20px;
 }
 
 .smallDiv.label,
@@ -309,14 +310,19 @@ body, html {
 }
 
 .green {
-    background-color: rgb(40, 167, 69);
-    color: white;
+    background-color: #6adb82;
+    border: 1.5px solid #71ba7a; /* Slightly darker green */
+    color: rgb(0, 0, 0);
 }
+
 .red {
-    background-color: rgb(220, 53, 69);
-    color: white;
+    background-color: #f89099;
+    border: 1.5px solid #d85d67; /* Slightly darker red */
+    color: rgb(8, 8, 8);
 }
+
 .orange {
-    background-color: rgb(255, 193, 7);
-    color: white;
+    background-color: #f3ca45;
+    border: 1.5px solid rgb(244, 192, 60); /* Slightly darker orange */
+    color: rgb(0, 0, 0);
 }

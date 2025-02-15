@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=output_circle" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Set Timer</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #121212;
+            color: white;
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            transition: background-color 1s ease, color 1s ease;
+        }
+
+        h2 {
+            font-size: 50px;
+            margin-bottom: 10px;
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .container {
+            text-align: center;
+            transition: opacity 0.5s ease;
+        }
+
+        input, button {
+            margin: 10px;
+            padding: 10px;
+            font-size: 16px;
+        }
+
+        button {
+            cursor: pointer;
+            border: none;
+            background: transparent;
+            color: white;
+            border-radius: 5px;
+            padding: 1px 1px;
+            font-size: 45px;
+        }
+
+        button:hover {
+            background: #92909037;
+        }
+
+
+        #timer {
+            font-size: 100px;
+            margin-bottom: 0;
+            display: none;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .material-symbols-outlined {
+            font-size: 40px;
+        }
+        h2{
+            font-size: 80px;
+        }
+        .title {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 80px;
+            margin-bottom: 20px;
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80%;
+        }
+
+        .title .line {
+            flex-grow: 1;
+            height: 1px;
+            background-color: white;
+            margin: 0 20px; /* Adjust spacing */
+        }
+        .input-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 2px; /* 2px space (black border effect) */
+        }
+
+        input {
+            padding: 12px;
+            font-size: 18px;
+            border: 2px solid white;
+            border-radius: 5px 0 0 5px;
+            background-color: #222; /* Darker color */
+            color: white;
+            outline: none;
+            text-align: center;
+            width: 150px;
+        }
+
+        button {
+            padding: 12px 20px;
+            font-size: 18px;
+            border: 2px solid black; /* 2px black border between input and button */
+            background-color: white;
+            color: black;
+            border-radius: 0 5px 5px 0; /* Rounded right edges */
+            cursor: pointer;
+            text-align: center;
+        }
+
+        button:hover {
+            background-color: #ccc;
+        }
+        .hr-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            margin: 10px 0;
+        }
+
+        .left-hr, .right-hr {
+            flex-grow: 1; /* Makes them take equal space */
+            height: 1px;
+            background-color: white;
+            border: none;
+        }
+
+        .left-hr {
+            margin-right: 10px; /* Space between HR and text */
+        }
+
+        .right-hr {
+            margin-left: 10px; /* Space between HR and text */
+        }
+
+
+        .input-container {
+            text-align: center;
+            transition: opacity 0.5s ease;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        input {
+            border-radius: 20px;
+            background-color: #333;
+            border: 2px solid white;
+            color: white;
+            padding: 10px;
+            font-size: 18px;
+        }
+
+
+    </style>
+</head>
+<body>
+
+    <div class="input-container"> <!-- Wrap everything inside this div -->
+        <h2>TIME-OUT</h2>
+        <div class="hr-container">
+            <hr class="left-hr">
+            <hr class="right-hr">
+        </div>
+        <input type="text" id="timeInput" placeholder="--:--" pattern="[0-9]{2}:[0-9]{2}" class="centered" />
+        <button onclick="startTimer()">Add</button>
+    </div>
+
+    <h2 id="timer" style="display: none;">00:00</h2> <!-- Initially hidden -->
+
+    <script>
+        let countdown;
+        let timeLeft = 0;
+
+        function startTimer() {
+            let inputTime = document.getElementById("timeInput").value.trim();
+            let inputContainer = document.querySelector(".input-container");
+
+            let minutes = 0, seconds = 0;
+
+            if (inputTime.includes(":")) {
+                let timeParts = inputTime.split(":");
+                if (timeParts.length !== 2 || isNaN(timeParts[0]) || isNaN(timeParts[1])) {
+                    return;
+                }
+                minutes = parseInt(timeParts[0], 10);
+                seconds = parseInt(timeParts[1], 10);
+            } else {
+                if (isNaN(inputTime) || inputTime === "") {
+                    return;
+                }
+                minutes = parseInt(inputTime, 10);
+            }
+
+            if (minutes < 0 || seconds < 0 || seconds >= 60) {
+                return;
+            }
+
+            clearInterval(countdown);
+            timeLeft = minutes * 60 + seconds;
+
+            inputContainer.classList.add("hidden"); // Hide entire container
+            document.getElementById("timer").style.display = "block";
+
+            updateDisplay();
+            countdown = setInterval(() => {
+                if (timeLeft > 0) {
+                    timeLeft--;
+                    updateDisplay();
+                } else {
+                    clearInterval(countdown);
+                    triggerScreenFlash();
+                }
+            }, 1000);
+        }
+
+        function updateDisplay() {
+            let minutes = Math.floor(timeLeft / 60);
+            let seconds = timeLeft % 60;
+            document.getElementById("timer").textContent = 
+                (minutes < 10 ? "0" : "") + minutes + ":" + (seconds < 10 ? "0" : "") + seconds;
+        }
+
+        function triggerScreenFlash() {
+            document.body.style.backgroundColor = "white";
+            document.body.style.color = "black";
+
+            setTimeout(() => {
+                document.body.style.backgroundColor = "#121212";
+                document.body.style.color = "white";
+                resetPage();
+            }, 2000);
+        }
+
+        function resetPage() {
+            document.getElementById("timer").style.display = "none";
+            document.querySelector(".input-container").classList.remove("hidden"); // Show everything again
+            document.getElementById("timeInput").value = "";
+        }
+
+</script>
+
+</body>
+</html>

@@ -1,7 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // Get DOM elements
+    // Get modal and close button elements
     const modal = document.getElementById('quote-modal');
-    const openModalBtn = document.getElementById('open-modal');
     const closeModalBtn = document.getElementById('close-modal');
     const quoteText = document.getElementById('quote-text');
 
@@ -9,26 +8,24 @@ document.addEventListener('DOMContentLoaded', () => {
     const quoteOfTheDay = "The only way to do great work is to love what you do. - Steve Jobs";
 
     // Function to open the modal
-    function openModal() {
-        quoteText.textContent = quoteOfTheDay; // Add the quote to the modal
-        modal.classList.remove('hidden'); // Show the modal
-        openModalBtn.classList.remove('hidden')
+    function openQOTDModal() {
+        quoteText.textContent = quoteOfTheDay; // Add the quote
+        modal.classList.remove('hidden'); // Show modal
     }
 
     // Function to close the modal
-    function closeModal() {
-        modal.classList.add('hidden'); // Hide the modal
+    function closeQOTDModal() {
+        modal.classList.add('hidden'); // Hide modal
     }
 
-    // Open the modal on page load
-    openModal();
+    // Open modal on page load
+    openQOTDModal();
 
-    // Event listeners
-    openModalBtn.addEventListener('click', openModal); // Open modal on button click
-    closeModalBtn.addEventListener('click', closeModal); // Close modal on button click
+    // Close modal when close button is clicked
+    closeModalBtn.addEventListener('click', closeQOTDModal);
 
-    // Close modal when clicking outside the modal content
+    // Close modal when clicking outside the content
     modal.addEventListener('click', (event) => {
-        if (event.target === modal) closeModal();
+        if (event.target === modal) closeQOTDModal();
     });
 });

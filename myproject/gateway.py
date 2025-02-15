@@ -216,6 +216,10 @@ def delete_all():
 @app.route('/day-list')
 def day():
     return render_template('day-list.html')
+
+@app.route('/timeout')
+def timeout():
+    return render_template('timeout.html')
 #0. Make a controller 
 #1. Create a route in this file that accepts data as a POST from new task form 
 #2. Handle Posted Data using alchemy to put the data into the database 

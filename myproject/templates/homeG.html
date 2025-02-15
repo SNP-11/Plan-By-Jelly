@@ -19,13 +19,14 @@
         </script>
     </head>
     <body data-bs-theme="dark">
+          
         <button id="toggleButton" class="toggle-btn" onclick="toggleMenu()">&#9681;</button>
 
     <div id="container" class="main-container">
         <div id="sideMenu" class="side-menu">
             <a href="/day-list">DAY-LIST</a>
             <a href="#">CALENDAR</a>
-            <a href="#">TIMEOUT</a>
+            <a href="/timeout">TIMEOUT</a>
             
         </div>
 
@@ -172,6 +173,36 @@
         
         <script src="{{ url_for('static', filename='js/home.js') }}"></script>
         <script src="{{ url_for('static', filename='js/actionable.js') }}"></script>
+
+<!-- Modal -->
+<!-- <div class="modal fade" id="autoOpenModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-QOTD">
+            <div class="modal-content modal-content-QOTD">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">QUOTE OF THE DAY</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    
+                </div>
+                <div class="modal-footer">
+                </div>
+            </div>
+        </div>
+</div> -->
+
+  
+        <!-- <script>
+           document.addEventListener("DOMContentLoaded", function () {
+            var modalElement = document.getElementById("autoOpenModal");
+            var modalInstance = new bootstrap.Modal(modalElement);
+
+            // Open the modal
+            modalInstance.show();
+
+        }); -->
+
+        <!-- </script> -->
     </body>
 </html>
 
