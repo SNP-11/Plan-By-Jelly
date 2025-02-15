@@ -167,7 +167,15 @@ document.addEventListener('DOMContentLoaded', function() {
             urgency: $("select#urgency").val(),
             save_task: $("input#save_task").is(":checked") == true ? 1 : 0
         }, function(response){
-            alert(response);
+            // alert(response);
+            taskCount++;
+            add_taskDiv(response, taskCount - 1); 
+            if (taskCount>=5){
+                let taskToRemove = taskCount - autoCompleteCount;
+                let taskDiv = document.querySelector(`div#autoComplete${taskToRemove}`);
+                taskDiv.remove();
+            }
+            // getTasks();
         });
     }
     
@@ -190,19 +198,27 @@ document.addEventListener('DOMContentLoaded', function() {
     // Attach the toggleMenu function to the toggle button
     document.getElementById("toggleButton").onclick = toggleMenu;
 
+    let taskCount = 0;
+    let autoCompleteCount = 5;
+
     // Existing logic for AJAX request to fetch tasks
-    $.ajax({
-        type: "POST",
-        url: "/get_tasks",
-        success: function(data) {
-            console.log(data); 
-            tasks = data;
-            data.forEach((task, i)=>{
-                add_taskDiv(task);
-                calculateTaskDuration(task, i);
-            });
-        }
-    });
+    
+    function getTasks() {
+        $.ajax({
+            type: "POST",
+            url: "/get_tasks",
+            success: function(data) {
+                console.log(data); 
+                tasks = data;
+                taskCount = data.length;
+                data.forEach((task, i)=>{
+                    add_taskDiv(task, i);
+                    calculateTaskDuration(task, i);
+                });
+            }
+        });
+    }
+    getTasks();
 
     function calculateTaskDuration(task, i){
         let start = parseInt(task.start_time);
@@ -212,11 +228,31 @@ document.addEventListener('DOMContentLoaded', function() {
 
     }
 
-    function add_taskDiv(date){
+    function add_taskDiv(date, i){
         let start = parseInt(date.start_time);
         let end = parseInt(date.end_time);
         start = new Date(start *1000);
         end = new Date(end * 1000);
+        if (i >= taskCount - autoCompleteCount){
+            let autoCompleteContainer = document.getElementById('autoCompletes');
+            let dummyAutoCompleteDiv = document.getElementById('dummyAccordion');
+            let autoCompleteDiv = dummyAutoCompleteDiv.cloneNode(true);
+            autoCompleteDiv.classList.remove('d-none');
+            autoCompleteDiv.id = 'autoComplete' + i;
+            //add content to the dummy div
+            let label = autoCompleteDiv.querySelector('div.accordion-item h2.accordion-header button');
+            label.innerText = date.label;
+            label.dataset.bsTarget = '#autoCompleteCollapse' + i;
+            let collapse = autoCompleteDiv.querySelector('div.accordion-item div#collapseOne');
+            collapse.id = 'autoCompleteCollapse' + i;
+            // end tcs
+
+            
+
+            // start tcs
+            autoCompleteContainer.appendChild(autoCompleteDiv);
+
+        }
         $(".content").each(function () {
             //first find start day and end day
             let columnDate = $(this).data("date");
