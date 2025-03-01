@@ -24,13 +24,17 @@
 
     <div id="container" class="main-container">
         <div id="sideMenu" class="side-menu">
-            <a href="/day-list">DAY-LIST</a>
-            <a href="#">CALENDAR</a>
+            <a href="/calendar">CALENDAR</a>
             <a href="/timeout">TIMEOUT</a>
+            <a href="#">SETTINGS</a>
             
         </div>
 
         <div id="mainContent" class="main-content">
+            <div class="week-navigation">
+                <span id="prevWeek" class="material-icons"><mark>chevron_left</mark></span>
+                <span id="nextWeek" class="material-icons"><mark>chevron_right</mark></span>
+            </div>            
             <div class="schedule-wrapper mx-md-6">
                 <div class="schedule-row row">
                     <!-- Column for Day 1 -->
@@ -49,6 +53,7 @@
                               <div id="modalBody">
                                 <div class = "row">
                                     <div class = "col-4">
+                                        <!-- <label for="urgency">   Urgency:</label> -->
                                         <select id = "urgency" class="form-select">
                                             <option>Very Urgent</option>
                                             <option>Urgent</option>
@@ -85,23 +90,21 @@
                                                     </h2>
                                                     <div id="collapseOne" class="accordion-collapse collapse">
                                                         <div class="accordion-body">
-                                                            <button class="btn-secondary" contenteditable="false" data-task-id="1">________</button>
-                                                            <button class="btn-secondary" contenteditable="false" data-task-id="2"></button>
-                                                            <button class="btn-secondary" contenteditable="false" data-task-id="3"></button>
-                                                            <button class="btn-secondary" contenteditable="false" data-task-id="4"></button>
-                                                            <button class="btn-secondary" contenteditable="false" data-task-id="5"></button>
-                                                            <!-- <div class="plus-button"></div>
-                                                            <button class="edit-button">Edit</button> -->
+                                                            <div class="date-label"> </div>
+                                                            <div class="date-urgency"></div>
+                                                           
+
                                                         </div>
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
                                     <div class="input-container">
-                                        <input type="text" class="reminder-box" id="reminder-box" required placeholder=" ">
-                                        <label for="reminder-box">Enter a reminder</label>
+                                        <button id="removeButton">Remove</button>
+                                        <!-- <input type="text" class="reminder-box" id="reminder-box" required placeholder=" "> -->
+                                        <!-- <label for="reminder-box">Enter a reminder</label> -->
                                     </div>
-                                    <button class="add-button">Add</button>
+                                    <!-- <button class="add-button">Add</button> -->
                                 </div>
                               </div> <!-- This is where we will load sunday.html content -->
                           </div>

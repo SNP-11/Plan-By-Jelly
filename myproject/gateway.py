@@ -216,6 +216,9 @@ def delete_all():
 @app.route('/day-list')
 def day():
     return render_template('day-list.html')
+@app.route('/calendar')
+def calendar():
+    return render_template('calendar.html')
 
 @app.route('/timeout')
 def timeout():

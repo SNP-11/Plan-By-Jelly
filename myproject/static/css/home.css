@@ -126,8 +126,8 @@ body, html {
 }
 
 .smallDiv {
-    width: 50px;
-    height: 50px;
+    width: 55px;
+    height: 55px;
     display:flex;
     flex-direction: column;
     background-color: blue;
@@ -226,6 +226,7 @@ body, html {
     padding-left: 15px;
     padding-right: 15px;
     box-shadow: 2px 0 5px rgba(0, 0, 0, 0.5);
+    display:none;
 }
 
 /* Links inside the sidebar */
@@ -325,4 +326,34 @@ body, html {
     background-color: #f3ca45;
     border: 1.5px solid rgb(244, 192, 60); /* Slightly darker orange */
     color: rgb(0, 0, 0);
+}
+
+.week-navigation {
+    position: absolute;
+    top: 10px;
+    right: 20px;
+    display: flex;
+    gap: 10px;
+}
+
+.week-navigation .material-icons {
+    cursor: pointer;
+    font-size: 30px;
+    color: white;
+    transition: 0.3s;
+    border-radius: 4px;
+    border-color:rgba(254, 219, 130, 0.789);
+    padding-top:10px;
+
+}
+
+.week-navigation .material-icons:hover {
+    color: #bbb;
+}
+mark{
+    background-color:rgba(21, 0, 255, 0.789);
+    border-radius: 5px;
+}
+.star{
+    color:gold;
 }

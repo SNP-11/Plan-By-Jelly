@@ -1,6 +1,10 @@
 document.addEventListener('DOMContentLoaded', function() {
-    // Initialize the sidebar state
-    let isMenuOpen = true;
+    let isMenuOpen = false;
+    let currentWeekStart = new Date();
+    let taskCount = 0;
+    let autoCompleteCount = 5;
+    let tasks = [];
+    let savedTasks = []; // Define savedTasks array
 
     // Function to update the days of the week displayed on the page
     function updateWeekdays() {
@@ -39,6 +43,61 @@ document.addEventListener('DOMContentLoaded', function() {
         updateWeekdays();
         setInterval(updateWeekdays, 24 * 60 * 60 * 1000);
     }, timeToMidnight);
+
+    // Function to update weekdays and tasks based on the current week's start date
+    function updateWeekdaysWithWeek(startingDate) {
+        const daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+        const sunday = new Date(startingDate);
+        sunday.setDate(sunday.getDate() - sunday.getDay()); // Get the Sunday of the selected week
+
+        for (let i = 0; i < 7; i++) {
+            const date = new Date(sunday);
+            date.setDate(sunday.getDate() + i); // Get each day of the week
+
+            const dayLabel = document.getElementById(`day${i + 1}`);
+            const dayColumn = document.getElementById(`column${i + 1}`);
+
+            if (dayLabel && dayColumn) {
+                // Update the label to show weekday and date
+                dayLabel.innerText = `${daysOfWeek[date.getDay()]} ${date.getDate()}`;
+                dayColumn.dataset.date = Math.floor(date.getTime() / 1000); // Store timestamp
+
+                // Clear old tasks before loading new ones
+                dayColumn.innerHTML = "";
+
+                // Load smallDivs for the selected week
+                loadTasksForDate(date, dayColumn);
+            }
+        }
+    }
+
+    // Function to load smallDivs (tasks) for a given date
+    function loadTasksForDate(date, column) {
+        const timestamp = Math.floor(date.getTime() / 1000); // Convert date to Unix timestamp
+        const tasksForDay = tasks[timestamp] || []; // Fetch tasks from stored task list
+
+        tasksForDay.forEach(task => {
+            let taskDiv = document.createElement("div");
+            taskDiv.className = "smallDiv";
+            taskDiv.innerText = task.label; // Display task name
+            taskDiv.dataset.startTime = task.start_time;
+            taskDiv.dataset.endTime = task.end_time;
+            column.appendChild(taskDiv);
+        });
+    }
+
+    // Function to navigate weeks
+    function changeWeek(days) {
+        currentWeekStart.setDate(currentWeekStart.getDate() + days);
+        updateWeekdaysWithWeek(currentWeekStart);
+    }
+
+    // Initialize the week on page load
+    updateWeekdaysWithWeek(currentWeekStart);
+
+    // Event listeners for week navigation
+    document.getElementById('prevWeek').addEventListener('click', () => changeWeek(-7));
+    document.getElementById('nextWeek').addEventListener('click', () => changeWeek(7));
 
     // Function to create and display smallDiv
     function createSmallDiv() {
@@ -123,12 +182,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
     document.getElementById("closeBtn").addEventListener('click', () => closeTaskModal());
 
-
     // Close the modal if the user clicks anywhere outside of the modal content
     window.onclick = function(event) {
         const modal = document.getElementById("myModal");
         if (event.target == modal) {
-            modal.style.display = "none";
+            modal.style.display = 'none';
         }
     };
 
@@ -167,15 +225,8 @@ document.addEventListener('DOMContentLoaded', function() {
             urgency: $("select#urgency").val(),
             save_task: $("input#save_task").is(":checked") == true ? 1 : 0
         }, function(response){
-            // alert(response);
             taskCount++;
             add_taskDiv(response, taskCount - 1); 
-            if (taskCount>=5){
-                let taskToRemove = taskCount - autoCompleteCount;
-                let taskDiv = document.querySelector(`div#autoComplete${taskToRemove}`);
-                taskDiv.remove();
-            }
-            // getTasks();
         });
     }
     
@@ -195,14 +246,15 @@ document.addEventListener('DOMContentLoaded', function() {
         isMenuOpen = !isMenuOpen; // Toggle the state
     }
 
+    document.addEventListener("DOMContentLoaded", () => {
+        document.getElementById("sideMenu").style.display = "none";
+        document.getElementById("toggleButton").innerHTML = "&#9681;";
+    });
+    
     // Attach the toggleMenu function to the toggle button
     document.getElementById("toggleButton").onclick = toggleMenu;
 
-    let taskCount = 0;
-    let autoCompleteCount = 5;
-
     // Existing logic for AJAX request to fetch tasks
-    
     function getTasks() {
         $.ajax({
             type: "POST",
@@ -211,7 +263,19 @@ document.addEventListener('DOMContentLoaded', function() {
                 console.log(data); 
                 tasks = data;
                 taskCount = data.length;
-                data.forEach((task, i)=>{
+                let startOfWeek = new Date();
+                startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay());
+                startOfWeek.setHours(0, 0, 0, 0);
+                let endOfWeek = new Date(startOfWeek);
+                endOfWeek.setDate(endOfWeek.getDate() + 6);
+                endOfWeek.setHours(23, 59, 59, 999);
+                let savedTasksToShow = tasks.filter(task => task.save_task && task.start_time >= startOfWeek.getTime() / 1000 && task.start_time <= endOfWeek.getTime() / 1000); // Get tasks for the current week
+                savedTasksToShow.forEach((task, i) => {
+                    add_taskDiv(task, i);
+                    calculateTaskDuration(task, i);
+                });
+                let unsavedTasksToShow = tasks.filter(task => !task.save_task); // Get unsaved tasks
+                unsavedTasksToShow.forEach((task, i) => {
                     add_taskDiv(task, i);
                     calculateTaskDuration(task, i);
                 });
@@ -225,39 +289,62 @@ document.addEventListener('DOMContentLoaded', function() {
         let end = parseInt(task.end_time);
         let duration = end-start;
         tasks[i].duration = duration;
-
     }
 
     function add_taskDiv(date, i){
         let start = parseInt(date.start_time);
         let end = parseInt(date.end_time);
-        start = new Date(start *1000);
+        start = new Date(start * 1000);
         end = new Date(end * 1000);
-        if (i >= taskCount - autoCompleteCount){
+        if (date.save_task) {
             let autoCompleteContainer = document.getElementById('autoCompletes');
             let dummyAutoCompleteDiv = document.getElementById('dummyAccordion');
+            if (!dummyAutoCompleteDiv) {
+                console.error('dummyAccordion element not found');
+                return;
+            }
             let autoCompleteDiv = dummyAutoCompleteDiv.cloneNode(true);
             autoCompleteDiv.classList.remove('d-none');
             autoCompleteDiv.id = 'autoComplete' + i;
-            //add content to the dummy div
+            autoCompleteContainer.appendChild(autoCompleteDiv);
+
+            // Update content of the accordion item
             let label = autoCompleteDiv.querySelector('div.accordion-item h2.accordion-header button');
             label.innerText = date.label;
             label.dataset.bsTarget = '#autoCompleteCollapse' + i;
             let collapse = autoCompleteDiv.querySelector('div.accordion-item div#collapseOne');
             collapse.id = 'autoCompleteCollapse' + i;
-            // end tcs
+    
+            let dateLabel = autoCompleteDiv.querySelector('div.accordion-item .accordion-collapse .accordion-body .date-label');
+            dateLabel.innerText = start.toLocaleString() + " ~ " + end.toLocaleString();
 
-            
+            let dateUrgency = autoCompleteDiv.querySelector('div.accordion-item .accordion-collapse .accordion-body .date-urgency');
+            dateUrgency.innerText = date.urgency;
 
-            // start tcs
-            autoCompleteContainer.appendChild(autoCompleteDiv);
+            // Remove reminder box and reminder text
+            let reminderBox = autoCompleteDiv.querySelector('.reminder-box');
+            if (reminderBox) {
+                reminderBox.remove();
+            }
+            let reminderText = autoCompleteDiv.querySelector('.reminder-text');
+            if (reminderText) {
+                reminderText.remove();
+            }
 
+            // Add the task to the list of savedTasks
+            savedTasks.push(autoCompleteDiv);
+
+            // If there are more than 5 saved tasks, remove the oldest one
+            if (savedTasks.length > autoCompleteCount) {
+                let taskToRemove = savedTasks.shift();
+                taskToRemove.remove();
+            }
         }
+
         $(".content").each(function () {
             //first find start day and end day
             let columnDate = $(this).data("date");
-            // console.log(columnDate);
-            let isEventInColumn = isSameDayEvent(columnDate, date.start_time, date.end_time)
+            let isEventInColumn = isSameDayEvent(columnDate, date.start_time, date.end_time);
             if (isEventInColumn){
                 let newTaskDiv = document.createElement('div');
                 newTaskDiv.className = 'smallDiv';
@@ -267,7 +354,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 newTaskDiv.setAttribute('data-start_time', date.start_time);
                 newTaskDiv.setAttribute('data-end_time', date.end_time);
                 newTaskDiv.setAttribute('data-urgency', date.urgency);
-                // newTaskDiv.innerText = start.toLocaleString() + " ~ " + end.toLocaleString();
                 newTaskDiv.addEventListener("mouseenter", (event) => clickDiv(event));
                 newTaskDiv.addEventListener("mouseleave", (event) => clickDiv(event));
                 newTaskDiv.addEventListener('click', (event) => dblClickDiv(event));
@@ -308,31 +394,31 @@ document.addEventListener('DOMContentLoaded', function() {
         const taskLabel = taskDiv.getAttribute('data-label');
         const taskStartTime = taskDiv.getAttribute('data-start_time');
         const taskEndTime = taskDiv.getAttribute('data-end_time');
-    
+
         // Populate modal fields with task data
         document.getElementById('taskLabelInput').value = taskLabel;
         document.getElementById('taskStartTimeInput').value = new Date(parseInt(taskStartTime) * 1000).toISOString().slice(0, 16); // format for datetime-local input
         document.getElementById('taskEndTimeInput').value = new Date(parseInt(taskEndTime) * 1000).toISOString().slice(0, 16);
-    
+
         // Show the modal
         modal.style.display = 'block';
-    
+
         // Add a listener to save changes
         document.getElementById('saveButton').onclick = function () {
             // Get updated values from modal fields
             const updatedLabel = document.getElementById('taskLabelInput').value;
             const updatedStartTime = new Date(document.getElementById('taskStartTimeInput').value).getTime() / 1000;
             const updatedEndTime = new Date(document.getElementById('taskEndTimeInput').value).getTime() / 1000;
-    
+
             // Update the taskDiv attributes with new values
             taskDiv.setAttribute('data-label', updatedLabel);
             taskDiv.setAttribute('data-start_time', updatedStartTime);
             taskDiv.setAttribute('data-end_time', updatedEndTime);
             taskDiv.innerText = new Date(updatedStartTime * 1000).toLocaleString() + " ~ " + new Date(updatedEndTime * 1000).toLocaleString();
-    
+
             // Close the modal
             modal.style.display = 'none';
         };
     }
 
-});  
+});
