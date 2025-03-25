@@ -182,6 +182,7 @@ body, html {
 
 .modal-content {
     position: absolute;
+    left: 30%; /* Center horizontally */
     background-color: #fefefe;
     margin: auto;
     padding: 20px;

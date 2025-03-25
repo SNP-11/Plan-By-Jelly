@@ -5,12 +5,36 @@ document.addEventListener('DOMContentLoaded', function() {
     let autoCompleteCount = 5;
     let tasks = [];
     let savedTasks = []; // Define savedTasks array
+    let weekOffset = 0;
 
+    function getSundayStartOfWeek() {
+        const now = new Date();
+        const dayOfWeek = now.getDay(); // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
+        const diff = dayOfWeek; // Days to subtract to reach Sunday
+        const sunday = new Date(now);
+        sunday.setDate(now.getDate() - diff);
+        sunday.setHours(0, 0, 0, 0); // Start of the day
+
+        return Math.floor(sunday.getTime() / 1000); // Convert to Unix timestamp in seconds
+    }
+    let startDay = getSundayStartOfWeek();
+
+    if (localStorage.getItem('weekOffset')) {
+        // weekOffset = parseInt(localStorage.getItem('weekOffset'));
+        changeWeek(parseInt(localStorage.getItem('weekOffset')) * 7);
+        localStorage.removeItem('weekOffset');
+    }
+    if (localStorage.getItem('startDay')) {
+        startDay = parseInt(localStorage.getItem('startDay'));
+        localStorage.removeItem('startDay');
+    }
+    
     // Function to update the days of the week displayed on the page
     function updateWeekdays() {
         const daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
         const today = new Date();
         const todayDayIndex = today.getDay();
+        console.log(todayDayIndex);
         const sunday = new Date(today);
         sunday.setDate(today.getDate() - todayDayIndex);
 
@@ -34,7 +58,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Call updateWeekdays and set intervals for updating days
-    updateWeekdays();
+    updateWeekdaysWithWeek(startDay);
     setInterval(updateWeekdays, 24 * 60 * 60 * 1000);
 
     const now = new Date();
@@ -90,14 +114,21 @@ document.addEventListener('DOMContentLoaded', function() {
     function changeWeek(days) {
         currentWeekStart.setDate(currentWeekStart.getDate() + days);
         updateWeekdaysWithWeek(currentWeekStart);
+        getTasks();
     }
 
     // Initialize the week on page load
     updateWeekdaysWithWeek(currentWeekStart);
 
     // Event listeners for week navigation
-    document.getElementById('prevWeek').addEventListener('click', () => changeWeek(-7));
-    document.getElementById('nextWeek').addEventListener('click', () => changeWeek(7));
+    document.getElementById('prevWeek').addEventListener('click', () => {
+        changeWeek(-7);
+        weekOffset--;
+    });
+    document.getElementById('nextWeek').addEventListener('click', () => {
+        changeWeek(7);
+        weekOffset++;
+    });
 
     // Function to create and display smallDiv
     function createSmallDiv() {
@@ -212,12 +243,14 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     
     document.getElementById("addButton").addEventListener('click', (event) => addTask(event));
+    document.getElementById("removeButton").addEventListener('click', (event) => removeTask(event));
+
 
     function addTask(event) { 
         var start_time = $("input[name = 'start_time']").val()
-        start_time = new Date(start_time).getTime() / 1000
+        start_time = new Date(new Date(start_time).toLocaleString('en-US')).getTime() / 1000
         var end_time = $("input[name = 'end_time']").val()
-        end_time = new Date(end_time).getTime() / 1000
+        end_time = new Date(new Date(end_time).toLocaleString('en-US')).getTime() / 1000
         $.post('/add_task', {
             label: $("input[name = 'label']").val(),
             start_time: start_time,
@@ -227,6 +260,16 @@ document.addEventListener('DOMContentLoaded', function() {
         }, function(response){
             taskCount++;
             add_taskDiv(response, taskCount - 1); 
+        });
+    }
+
+    function removeTask(event) {
+        console.log(event.srcElement.dataset.task_id);
+        $.post('/delete_task', {
+            id: event.srcElement.dataset.task_id
+        }, function(response){
+            getTasks();
+            console.log(response);
         });
     }
     
@@ -256,6 +299,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Existing logic for AJAX request to fetch tasks
     function getTasks() {
+        $('.smallDiv').remove();
         $.ajax({
             type: "POST",
             url: "/get_tasks",
@@ -264,21 +308,28 @@ document.addEventListener('DOMContentLoaded', function() {
                 tasks = data;
                 taskCount = data.length;
                 let startOfWeek = new Date();
-                startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay());
+                startOfWeek.setDate((startOfWeek.getDate() - startOfWeek.getDay())+weekOffset*7); // Get the start of the current week
                 startOfWeek.setHours(0, 0, 0, 0);
                 let endOfWeek = new Date(startOfWeek);
                 endOfWeek.setDate(endOfWeek.getDate() + 6);
                 endOfWeek.setHours(23, 59, 59, 999);
                 let savedTasksToShow = tasks.filter(task => task.save_task && task.start_time >= startOfWeek.getTime() / 1000 && task.start_time <= endOfWeek.getTime() / 1000); // Get tasks for the current week
                 savedTasksToShow.forEach((task, i) => {
+                    task.start_time = (new Date(new Date(task.start_time).toLocaleString('en-US'))).getTime();
+                    task.end_time = (new Date(new Date(task.end_time).toLocaleString('en-US'))).getTime();
+                    console.log(task.start_time + " >= " + startOfWeek.getTime() / 1000);
                     add_taskDiv(task, i);
                     calculateTaskDuration(task, i);
                 });
-                let unsavedTasksToShow = tasks.filter(task => !task.save_task); // Get unsaved tasks
+                let unsavedTasksToShow = tasks.filter(task => !task.save_task && task.start_time >= startOfWeek.getTime() / 1000 && task.start_time <= endOfWeek.getTime() / 1000); // Get unsaved tasks
                 unsavedTasksToShow.forEach((task, i) => {
+                    task.start_time = (new Date(new Date(task.start_time).toLocaleString('en-US'))).getTime();
+                    task.end_time = (new Date(new Date(task.end_time).toLocaleString('en-US'))).getTime();
+                    console.log(task.start_time + " >= " + startOfWeek.getTime() / 1000);
                     add_taskDiv(task, i);
                     calculateTaskDuration(task, i);
                 });
+                
             }
         });
     }
@@ -294,8 +345,8 @@ document.addEventListener('DOMContentLoaded', function() {
     function add_taskDiv(date, i){
         let start = parseInt(date.start_time);
         let end = parseInt(date.end_time);
-        start = new Date(start * 1000);
-        end = new Date(end * 1000);
+        start = new Date(start * 1000).toUTCString();
+        end = new Date(end * 1000).toUTCString();
         if (date.save_task) {
             let autoCompleteContainer = document.getElementById('autoCompletes');
             let dummyAutoCompleteDiv = document.getElementById('dummyAccordion');
@@ -321,6 +372,16 @@ document.addEventListener('DOMContentLoaded', function() {
             let dateUrgency = autoCompleteDiv.querySelector('div.accordion-item .accordion-collapse .accordion-body .date-urgency');
             dateUrgency.innerText = date.urgency;
 
+            let autoCompleteButton = autoCompleteDiv.querySelector('div.accordion-item .accordion-collapse .accordion-body button.autoCompleteButton');
+            autoCompleteButton.addEventListener('click', () => {
+                let start_locale = start.toLocaleString('en-US');
+                console.log(start_locale);
+                document.getElementById('start_time').value = (new Date(start_locale)).toISOString().slice(0, 16);
+                document.getElementById('end_time').value = end.toISOString().slice(0, 16);
+                document.getElementById('label-input').value = date.label;
+                document.getElementById('urgency').value = date.urgency;
+            });
+
             // Remove reminder box and reminder text
             let reminderBox = autoCompleteDiv.querySelector('.reminder-box');
             if (reminderBox) {
@@ -340,6 +401,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 taskToRemove.remove();
             }
         }
+
 
         $(".content").each(function () {
             //first find start day and end day
@@ -362,6 +424,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
+
 
     /**
      * Check if event_start or event_end fall on the same day as day_compare
@@ -395,6 +458,8 @@ document.addEventListener('DOMContentLoaded', function() {
         const taskStartTime = taskDiv.getAttribute('data-start_time');
         const taskEndTime = taskDiv.getAttribute('data-end_time');
 
+        selected_id = taskId;
+        
         // Populate modal fields with task data
         document.getElementById('taskLabelInput').value = taskLabel;
         document.getElementById('taskStartTimeInput').value = new Date(parseInt(taskStartTime) * 1000).toISOString().slice(0, 16); // format for datetime-local input
@@ -414,11 +479,14 @@ document.addEventListener('DOMContentLoaded', function() {
             taskDiv.setAttribute('data-label', updatedLabel);
             taskDiv.setAttribute('data-start_time', updatedStartTime);
             taskDiv.setAttribute('data-end_time', updatedEndTime);
-            taskDiv.innerText = new Date(updatedStartTime * 1000).toLocaleString() + " ~ " + new Date(updatedEndTime * 1000).toLocaleString();
+            taskDiv.innerText = new Date(updatedStartTime * 1000).toLocaleString() + " - " + new Date(updatedEndTime * 1000).toLocaleString();
 
             // Close the modal
             modal.style.display = 'none';
         };
+
+        
     }
 
+    
 });

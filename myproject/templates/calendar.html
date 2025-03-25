@@ -33,11 +33,6 @@
         .current-day {
             border: 4px dashed rgb(255, 217, 0);
         }
-        /* .day:hover {
-            background-color: #fff6d3;
-            cursor: pointer;
-        } */
-
         .day {
             position: relative;
             padding: 3.3vw;
@@ -139,6 +134,13 @@
         .side-menu.open {
         transform: translateX(0);
         }
+        .smallDiv {
+            width: 20px;
+            height: 20px;
+            background-color: #ff0000; /* Red color for small divs */
+            margin: 2px;
+            border-radius: 50%;
+        }
     </style>
 </head>
 <body>
@@ -161,82 +163,148 @@
         </div>
         <div class="calendar-grid" id="calendarGrid"></div>
     </div>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
+        const colordict = {
+            "Very Urgent": "red",
+            "Urgent": "orange",
+            "Not Urgent": "green"
+        }
+        const secInWeek = 604800;
+        function getSundayStartOfWeek() {
+            const now = new Date();
+            const dayOfWeek = now.getDay(); // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
+            const diff = dayOfWeek; // Days to subtract to reach Sunday
+            const sunday = new Date(now);
+            sunday.setDate(now.getDate() - diff);
+            sunday.setHours(0, 0, 0, 0); // Start of the day
+
+            return Math.floor(sunday.getTime() / 1000); // Convert to Unix timestamp in seconds
+        }
+        const sundayTimestamp = getSundayStartOfWeek();
+
+
         function toggleMenu() {
             const sideMenu = document.getElementById("sideMenu");
             sideMenu.classList.toggle("open");
         }
-       function getMonthData(startYear, numYearsBefore, numYearsAfter) {
-        const monthData = {};
-        for (let year = startYear - numYearsBefore; year <= startYear + numYearsAfter; year++) {
-            for (let month = 0; month < 12; month++) {
-                const firstDay = new Date(year, month, 1).getDay();
-                const daysInMonth = new Date(year, month + 1, 0).getDate();
-                const key = `${year}-${String(month + 1).padStart(2, '0')}`;
-                monthData[key] = { days: daysInMonth, start: firstDay };
+
+        function getMonthData(startYear, numYearsBefore, numYearsAfter) {
+            const monthData = {};
+            for (let year = startYear - numYearsBefore; year <= startYear + numYearsAfter; year++) {
+                for (let month = 0; month < 12; month++) {
+                    const firstDay = new Date(year, month, 1).getDay();
+                    const daysInMonth = new Date(year, month + 1, 0).getDate();
+                    const key = `${year}-${String(month + 1).padStart(2, '0')}`;
+                    monthData[key] = { days: daysInMonth, start: firstDay };
+                }
             }
-        }
-        return monthData;
-    }
-
-    let currentDate = new Date();
-    let currentYear = currentDate.getFullYear();
-    let currentMonth = currentDate.getMonth();
-    const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-    const monthData = getMonthData(currentYear, 2, 2); // Generates data for 2 years before and 2 years after
-
-    const monthLabel = document.getElementById("monthLabel");
-
-    function generateCalendar(year, month) {
-        const calendarGrid = document.getElementById("calendarGrid");
-        calendarGrid.innerHTML = "";
-
-        // Dynamically generate more data if we go beyond the preloaded range
-        if (!monthData[`${year}-${String(month + 1).padStart(2, '0')}`]) {
-            Object.assign(monthData, getMonthData(year, 2, 2));
+            return monthData;
         }
 
-        const monthKey = `${year}-${String(month + 1).padStart(2, '0')}`;
-        const { days, start } = monthData[monthKey];
+        let currentDate = new Date();
+        let currentYear = currentDate.getFullYear();
+        let currentMonth = currentDate.getMonth();
+        const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+        const monthData = getMonthData(currentYear, 2, 2); // Generates data for 2 years before and 2 years after
 
-        monthLabel.textContent = `${monthNames[month]} ${year}`;
+        const monthLabel = document.getElementById("monthLabel");
 
-        const today = new Date();
-        const isCurrentMonth = year === today.getFullYear() && month === today.getMonth();
+        function generateCalendar(year, month) {
+            const calendarGrid = document.getElementById("calendarGrid");
+            calendarGrid.innerHTML = "";
 
-        for (let i = 0; i < start; i++) {
-            calendarGrid.innerHTML += '<div class="day hidden"></div>';
-        }
-
-        for (let i = 1; i <= days; i++) {
-            let className = "day";
-            if (isCurrentMonth && i === today.getDate()) {
-                className += " current-day";
+            // Dynamically generate more data if we go beyond the preloaded range
+            if (!monthData[`${year}-${String(month + 1).padStart(2, '0')}`]) {
+                Object.assign(monthData, getMonthData(year, 2, 2));
             }
-            calendarGrid.innerHTML += `<div class="${className}"><div class="day-number">${i}</div></div>`;
-        }
-    }
 
-    document.getElementById("prevMonth").addEventListener("click", function() {
-        currentMonth--;
-        if (currentMonth < 0) {
-            currentMonth = 11;
-            currentYear--;
+            const monthKey = `${year}-${String(month + 1).padStart(2, '0')}`;
+            const { days, start } = monthData[monthKey];
+
+            monthLabel.textContent = `${monthNames[month]} ${year}`;
+
+            const today = new Date();
+            const isCurrentMonth = year === today.getFullYear() && month === today.getMonth();
+
+            for (let i = 0; i < start; i++) {
+                calendarGrid.innerHTML += '<div class="day hidden"></div>';
+            }
+
+            for (let i = 1; i <= days; i++) {
+                let className = "day";
+                if (isCurrentMonth && i === today.getDate()) {
+                    className += " current-day";
+                }
+                let date = Date.UTC(year, month, i) / 1000;
+                calendarGrid.innerHTML += `<div class="${className}" data-date="${date}"><div class="day-number">${i}</div></div>`;
+            }
+
+            // Load tasks for the current month
+            loadTasksForMonth(year, month);
         }
+
+        function loadTasksForMonth(year, month) {
+            $.ajax({
+                type: "POST",
+                url: "/get_tasks",
+                success: function(data) {
+                    const tasks = data;
+                    tasks.forEach(task => {
+                        const taskDate = new Date(task.start_time * 1000);
+                        if (taskDate.getFullYear() === year && taskDate.getMonth() === month) {
+                            let taskDateDay = taskDate.getTime() / 1000;
+                            taskDateDay = taskDateDay- (taskDateDay % 86400);
+                            const dayElement = document.querySelector(`.day[data-date="${taskDateDay}"]`);
+                            console.log(taskDateDay);
+                            if (dayElement) {
+                                const taskDiv = document.createElement("div");
+                                taskDiv.className = "smallDiv";
+                                taskDiv.dataset.id = task.id;
+                                taskDiv.dataset.uid = task.uid;
+                                taskDiv.dataset.label = task.label;
+                                taskDiv.dataset.start_time = task.start_time;
+                                taskDiv.dataset.end_time = task.end_time;
+                                taskDiv.dataset.urgency = task.urgency;
+                                taskDiv.style.backgroundColor = colordict[task.urgency];
+                                dayElement.appendChild(taskDiv);
+                            }
+                        }
+                    });
+                }
+            });
+        }
+
+        document.addEventListener("click", function(event) {
+            if (event.target.classList.contains("day")) {
+                let timestamp = event.target.dataset.date;
+                let weekOffset = Math.floor((timestamp - sundayTimestamp) / secInWeek);
+                console.log(weekOffset);
+                localStorage.setItem("weekOffset", weekOffset);
+                localStorage.setItem("startDay", timestamp);
+                window.location.href = "/home";
+            }
+        });
+
+        document.getElementById("prevMonth").addEventListener("click", function() {
+            currentMonth--;
+            if (currentMonth < 0) {
+                currentMonth = 11;
+                currentYear--;
+            }
+            generateCalendar(currentYear, currentMonth);
+        });
+
+        document.getElementById("nextMonth").addEventListener("click", function() {
+            currentMonth++;
+            if (currentMonth > 11) {
+                currentMonth = 0;
+                currentYear++;
+            }
+            generateCalendar(currentYear, currentMonth);
+        });
+
         generateCalendar(currentYear, currentMonth);
-    });
-
-    document.getElementById("nextMonth").addEventListener("click", function() {
-        currentMonth++;
-        if (currentMonth > 11) {
-            currentMonth = 0;
-            currentYear++;
-        }
-        generateCalendar(currentYear, currentMonth);
-    });
-
-    generateCalendar(currentYear, currentMonth);
-
     </script>
 </body>
 </html>
