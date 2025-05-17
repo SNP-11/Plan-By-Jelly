@@ -228,6 +228,15 @@ def timeout():
 #2. Handle Posted Data using alchemy to put the data into the database 
 #3. Resolve the comment by using SELECT in alchemy
 
+@app.route('/reward')
+def reward():
+    return render_template('rewardPage.html')
+
+@app.route('/signout')
+def signout():
+        session.clear()  # Clear all session data
+        return redirect(url_for('index'))
+
 if __name__ == '__main__':
     app.run(debug=True)
 

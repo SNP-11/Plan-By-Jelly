@@ -7,7 +7,9 @@ body, html {
     min-width: 100vw;
     background-color: #1a1a1a; /* Change to your desired background color */
 }
-
+title{
+    color:#0056b3
+}
 .schedule-row {
     width: 100%;
     min-width: 1000px;
@@ -139,6 +141,8 @@ body, html {
     background-color: #f2f2f2;
     padding: 0 20px;
     font-size:10px;
+    font-family: "poppins", sans-serif; 
+    font-weight: 500;
 }
 
 .smallDiv.expanded {
@@ -192,6 +196,9 @@ body, html {
     top: 50px; /* Set a specific distance from the top */
     resize: both; /* Allow resizing */
     overflow: auto; /* Add scroll if needed */
+    font-family: "poppins", sans-serif; /* Apply Winky Sans font */
+    font-weight: 500;
+
 }
 
 .close {
@@ -355,6 +362,194 @@ mark{
     background-color:rgba(21, 0, 255, 0.789);
     border-radius: 5px;
 }
-.star{
-    color:gold;
+
+
+#saveButton:hover {
+    background-color: #000000; /* Darker green on hover */
+    transform: scale(1.1); /* Slightly enlarge on hover */
+}
+.material-symbols-outlined {
+    font-family: 'Material Symbols Outlined', sans-serif;
+    font-weight: normal;
+    font-style: normal;
+    font-size: 60px; /* Adjust size as needed */
+    line-height: 1;
+    letter-spacing: normal;
+    text-transform: none;
+    display: inline-block;
+    white-space: nowrap;
+    word-wrap: normal;
+    direction: ltr;
+    -webkit-font-smoothing: antialiased;
+}
+/* Hide the actual checkbox */
+.star-checkbox {
+    display: none;
+}
+
+/* Style the star label */
+.star-label {
+    font-family: 'Material Icons', sans-serif; /* Use Material Icons font */
+    font-size: 60px; /* Increase the size of the star */
+    color: #ccc; /* Default color for the star */
+    cursor: pointer; /* Change cursor to pointer */
+    transition: color 0.3s ease, background-color 0.3s ease;
+    padding: 15px; /* Increase padding to make the circle bigger */
+    border-radius: 50%; /* Make the background circular */
+    margin-left: 500px; /* Position the star horizontally */
+    margin-top: -40px; /* Adjust vertical positioning */
+}
+.star-label + .material-icons {
+    font-size: 60px !important; /* Force the icon size to 60px */
+}
+/* Change the star color and background when checked */
+.star-checkbox:checked + .star-label {
+    color: #fff; /* Star color when checked */
+    background-color: #007bff; /* Background color when checked (same as openModalBtn) */
+}
+
+/* Add Button */
+#addButton {
+    background: none; /* Remove background */
+    border: none; /* Remove border */
+    color: #007bff; /* Set icon color */
+    font-size: 24px; /* Adjust icon size */
+    cursor: pointer; /* Change cursor to pointer */
+    padding: 5px; /* Add some padding */
+    transition: transform 0.2s ease, color 0.2s ease; /* Add hover effect */
+}
+
+#addButton:hover {
+    color: #0056b3; /* Change color on hover */
+    transform: scale(1.2); /* Slightly enlarge on hover */
+}
+
+/* Wrapping container for inputs and buttons */
+.task-input-wrapper {
+    display: flex;
+    gap: 10px; /* Space between input group and button group */
+    align-items: flex-start; /* Align elements at the top */
+    width: 100%; /* Ensure full width usage */
+}
+
+/* Group for inputs */
+/* Wrapping container for inputs and buttons */
+.task-input-wrapper {
+    display: flex;
+    gap: 10px; /* Space between input group and button group */
+    align-items: flex-start; /* Align elements at the top */
+    width: 100%; /* Ensure full width usage */
+}
+
+/* Group for inputs */
+.task-input-group {
+    display: flex;
+    flex-direction: column; /* Stack the inputs vertically */
+    gap: 10px; /* Space between inputs */
+    flex-grow: 1; /* Allow inputs to take more space */
+}
+
+/* Group for buttons (Add and Remove buttons) */
+.button-group {
+    display: flex;
+    flex-direction: column; /* Stack the buttons vertically */
+    gap: 10px; /* Space between buttons */
+    align-items: center; /* Center align the buttons */
+}
+
+/* Styling for input fields */
+.datetime-input {
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    width: 100%; /* Inputs take up 100% of the parent width */
+}
+
+/* Add Button */
+#addButton {
+    border: none; /* Remove border */
+    color: #ffffff; /* Set icon color */
+    font-size: 24px; /* Adjust icon size */
+    cursor: pointer; /* Change cursor to pointer */
+    padding: 5px; /* Add some padding */
+    transition: transform 0.2s ease, color 0.2s ease; /* Add hover effect */
+    width: 40px; /* Fixed width for square button */
+    height: 40px; /* Fixed height to make it square */
+    background-color: #007bff;
+    border-radius: 5px;
+
+
+}
+
+/* Remove Button */
+#removeButton {
+    background: none; /* Remove background */
+    border: none; /* Remove border */
+    color: #ffffff; /* Set icon color */
+    font-size: 24px; /* Adjust icon size */
+    cursor: pointer; /* Change cursor to pointer */
+    padding: 5px; /* Add some padding */
+    transition: transform 0.2s ease, color 0.2s ease; /* Add hover effect */
+    background-color: #007bff;
+    border-radius: 5px;
+    width: 40px; /* Fixed width for square button */
+    height: 40px; /* Fixed height to make it square */
+}
+
+/* Hover effects for Add and Remove buttons */
+#addButton:hover, #removeButton:hover {
+    transform: scale(1.2); /* Slightly enlarge on hover */
+    color: #ffffff; /* Change color on hover */
+}
+#header {
+    position: absolute; /* Position the header independently */
+    top: 10px;          /* Distance from the top of the page */
+    left: 50%;          /* Center horizontally */
+    transform: translateX(-50%); /* Adjust for centering */
+    display: flex;
+    justify-content: center; /* Center content horizontally */
+    align-items: center;    /* Center content vertically */
+    text-align: center;     /* Ensure text is centered */
+    padding: 10px;          /* Add some padding for spacing */
+    background-color: #333; /* Optional: Add a background color */
+    color: #fff;            /* Optional: Set text color */
+    border-radius: 8px;     /* Optional: Add rounded corners */
+    z-index: 1000;          /* Ensure it stays on top of other elements */
+    width: fit-content;     /* Adjust width to fit content */
+}
+
+.completion {
+    display: flex;          /* Use flexbox for alignment */
+    align-items: center;   /* Center items vertically */
+    justify-content: center; /* Center items horizontally */}
+
+.completion-button {
+    background-color: #ffe600; /* Button background color */
+    color: white;             /* Text color */
+    border: none;             /* Remove border */
+    border-radius: 7px;       /* Rounded corners */
+    border-width: 2px;        /* Border width */
+    border-color: #ffe600;    /* Border color */
+    padding: 7px 7px;         /* Padding for the button */
+    font-size: 16px;          /* Font size */
+    cursor: pointer;          /* Pointer cursor on hover */
+    display: inline-flex;     /* Align text and icons inline */
+    align-items: center;      /* Center content vertically */
+    justify-content: center;  /* Center content horizontally */
+    gap: 6px;                /* Space between icons and text */
+}
+#toast-container {
+    position: fixed;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1000;
+    display: none; /* Initially hidden */
+    background-color: #333;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 5px;
+    font-size: 16px;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.2);
+    opacity: 1; /* Ensure opacity is set to 1 */
 }

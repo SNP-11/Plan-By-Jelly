@@ -24,6 +24,8 @@ body {
     width: 80%;
     max-width: 1200px; /* Adjust as needed */
     gap: 50px; /* Adjust the space between the two sections */
+    z-index: 1;
+    position: relative;
 }
 
 .left-content {

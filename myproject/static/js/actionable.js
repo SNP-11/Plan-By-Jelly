@@ -1,7 +1,7 @@
 const colordict = {
-    "Very Urgent": "red",
-    "Urgent": "orange",
-    "Not Urgent": "green"
+    "Very Important": "red",
+    "Important": "orange",
+    "Not Important": "green"
 }
 
 let clickTimeout = null;

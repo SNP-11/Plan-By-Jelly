@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Rewards</title>
+  <style>
+    body {
+      background-color: #121212;
+      color: #fff;
+      font-family: 'Segoe UI', sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+
+    .header {
+      text-align: center;
+      padding: 20px;
+      font-size: 2em;
+      font-weight: bold;
+      background-color: #1f1f1f;
+      border-bottom: 2px solid #292929;
+    }
+
+    .rewards-container {
+      padding: 40px;
+      max-width: 700px;
+      margin: auto;
+    }
+
+    .badge {
+      display: flex;
+      align-items: center;
+      background: #1c1c1e;
+      color: #fff;
+      margin: 15px 0;
+      border-radius: 16px;
+      padding: 10px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    }
+
+    .badge img {
+      width: 80px;
+      height: 80px;
+      margin-right: 15px;
+      border-radius: 12px;
+    }
+
+    .progress-bar {
+      width: 580px;
+      height: 12px;
+      background: #333;
+      border-radius: 6px;
+      margin: 5px 0;
+      overflow: hidden;
+    }
+
+    .progress {
+      height: 100%;
+      background: linear-gradient(to right, #ffd700, #ffa500);
+      width: 0%;
+      border-radius: 6px;
+      transition: width 0.5s ease;
+    }
+
+    .badge strong {
+      font-size: 1.1em;
+    }
+
+    .badge span {
+      font-size: 0.9em;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">Achievements</div>
+
+  <div class="rewards-container">
+    <div class="badge" id="sage-badge">
+      <img src="{{ url_for('static', filename='badge_beginner.png') }}" alt="Sage Badge">
+      <div>
+        <strong id="sage-title">Beginner</strong>
+        <div class="progress-bar"><div class="progress" id="sage-progress"></div></div>
+        <span id="xp-display">0 XP</span>
+      </div>
+    </div>
+
+    <div class="badge" id="streak-badge">
+      <img src="{{ url_for('static', filename='badge_streak.png') }}" alt="Streak Badge">
+      <div>
+        <strong>Streak Star</strong>
+        <div class="progress-bar"><div class="progress" id="streak-progress"></div></div>
+        <span id="streak-display">0 Days</span>
+      </div>
+    </div>
+
+    <div class="badge" id="organizer-badge">
+      <img src="{{ url_for('static', filename='badge_organizer.png') }}" alt="Task Tamer">
+      <div>
+        <strong>Task Tamer</strong>
+        <div class="progress-bar"><div class="progress" id="task-progress"></div></div>
+        <span>Complete 10 tasks</span>
+      </div>
+    </div>
+
+    <div class="badge" id="routine-badge">
+      <img src="{{ url_for('static', filename='badge_routine.png') }}" alt="Routine Builder">
+      <div>
+        <strong>Routine Builder</strong>
+        <div class="progress-bar"><div class="progress" id="routine-progress"></div></div>
+        <span>Set 5 recurring tasks</span>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Get XP
+    let xp = localStorage.getItem("comp_points") ? parseInt(localStorage.getItem("comp_points")) : 0;
+    document.getElementById('xp-display').textContent = xp + ' XP';
+
+    // Determine Sage Level
+    let sageLevel = "Beginner";
+    let sagePercent = 0;
+    if (xp >= 700) {
+      sageLevel = "Explorer";
+      sagePercent = 100;
+    } else if (xp >= 250) {
+      sageLevel = "Journeyor";
+      sagePercent = ((xp - 250) / (700 - 250)) * 100;
+    } else if (xp >= 50) {
+      sageLevel = "Traveler";
+      sagePercent = ((xp - 50) / (250 - 50)) * 100;
+    } else {
+      sagePercent = (xp / 50) * 100;
+    }
+    // Determine which badge image to use
+    let sageImage = "";
+    switch (sageLevel) {
+      case "Explorer":
+        sageImage = "{{ url_for('static', filename='badge_explorer.png') }}";
+        break;
+      case "Journeyor":
+        sageImage = "{{ url_for('static', filename='badge_journeyor.png') }}";
+        break;
+      case "Traveler":
+        sageImage = "{{ url_for('static', filename='badge_traveler.png') }}";
+        break;
+      default:
+        sageImage = "{{ url_for('static', filename='badge_beginner.png') }}";
+        break;
+    }
+
+// Dynamically update image
+document.querySelector("#sage-badge img").src = sageImage;
+
+
+    document.getElementById("sage-title").textContent = sageLevel;
+    document.getElementById("sage-progress").style.width = `${sagePercent}%`;
+
+    // Get streaks
+    let streaks = localStorage.getItem("streaks") ? parseInt(localStorage.getItem("streaks")) : 0;
+    document.getElementById('streak-display').textContent = streaks + ' Days';
+    let streakPercent = Math.min((streaks / 30) * 100, 100);
+    document.getElementById("streak-progress").style.width = `${streakPercent}%`;
+
+    // Example task completion (you can update this with your actual logic)
+    let tasksCompleted = localStorage.getItem("completed_tasks") ? parseInt(localStorage.getItem("completed_tasks")) : 0;
+    document.getElementById("task-progress").style.width = `${Math.min((tasksCompleted / 10) * 100, 100)}%`;
+
+    // Example routine count
+    let routinesCreated = localStorage.getItem("routines") ? parseInt(localStorage.getItem("routines")) : 0;
+    document.getElementById("routine-progress").style.width = `${Math.min((routinesCreated / 5) * 100, 100)}%`;
+  </script>
+</body>
+</html>

@@ -6,6 +6,7 @@
     <title>Login Page</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/login.css') }}">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.4/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.4/ScrollTrigger.min.js"></script>
 </head>
 <body>
     <div class="container">
@@ -16,11 +17,9 @@
             <h5>Sign In</h5>
             <form action="{{ url_for('login') }}" method="post">
                 <div class="input-container">
-                    <label for="username">Username:</label>
                     <input type="text" id="username" name="username" placeholder="username" required>
                 </div>
                 <div class="input-container">
-                    <label for="password">Password:</label>
                     <input type="password" id="password" name="password" placeholder="password" required>
                 </div>
                 <input type="submit" value="Login">
@@ -32,57 +31,125 @@
         </div>
     </div>
 
-    <script>
-        // GSAP animations for the login page
-        gsap.from("#welcome", {duration: 1, y: -50, opacity: 0, ease: "power3.out"});
-        gsap.from("h5", {duration: 1, y: 50, opacity: 0, delay: 0.5, stagger: 0.2, ease: "power3.out"});
-        gsap.from("form", {duration: 1, scale: 0.5, opacity: 0, delay: 1, ease: "back.out"});
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
 
-        gsap.from("label", {
-            scrollTrigger: {
-                trigger: "label",
-                start: "top 80%",
-                end: "top 60%",
-                scrub: true
-            },
-            y: 100,
-            opacity: 0
+    <script>
+        // === GSAP Text Animations ===
+        gsap.from("h1", {
+            opacity: 0,
+            y: -50,
+            scale: 0.95,
+            duration: 1.2,
+            ease: "power4.out"
         });
 
-        gsap.from("input[type='text'], input[type='password']", {
-            scrollTrigger: {
-                trigger: "input",
-                start: "top 80%",
-                end: "top 60%",
-                scrub: true
-            },
-            y: 100,
-            opacity: 0
+        gsap.from("h5", {
+            opacity: 0,
+            y: 20,
+            delay: 0.3,
+            duration: 1,
+            ease: "power2.out"
+        });
+
+        gsap.from(".input-container", {
+            opacity: 0,
+            y: 30,
+            stagger: 0.1,
+            delay: 0.6,
+            ease: "power2.out"
         });
 
         gsap.from("input[type='submit']", {
-            scrollTrigger: {
-                trigger: "input[type='submit']",
-                start: "top 80%",
-                end: "top 60%",
-                scrub: true
-            },
-            y: 100,
-            opacity: 0
+            opacity: 0,
+            y: 40,
+            delay: 1.1,
+            duration: 0.8,
+            ease: "back.out(1.7)"
         });
 
-        // JavaScript for input label animation
-        const inputs = document.querySelectorAll(".input-container input");
-        inputs.forEach(input => {
-            input.addEventListener("focus", () => {
-                input.previousElementSibling.classList.add("active");
+        // === Particle Canvas with 3 Yellow Particles ===
+        const canvas = document.createElement("canvas");
+        document.body.appendChild(canvas);
+        canvas.style.cssText = `
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+            opacity: 0.2;
+        `;
+
+        const ctx = canvas.getContext("2d");
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        const particles = [];
+
+        // Add 3 yellow particles first
+        for (let i = 0; i < 3; i++) {
+            particles.push({
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height,
+                vx: (Math.random() - 0.5) * 0.3,
+                vy: (Math.random() - 0.5) * 0.3,
+                size: 25 + Math.random() * 10,
+                opacity: 1,
+                color: "rgba(255, 215, 0, 1)" // yellow
             });
-            input.addEventListener("blur", () => {
-                if (input.value === "") {
-                    input.previousElementSibling.classList.remove("active");
+        }
+
+        // Add 17 normal white/light particles
+        for (let i = 0; i < 50; i++) {
+            particles.push({
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height,
+                vx: (Math.random() - 0.5) * 0.2,
+                vy: (Math.random() - 0.5) * 0.2,
+                size: 20 + Math.random() * 20,
+                opacity: 0.5 + Math.random() * 0.5,
+                color: "rgba(255, 255, 255, " // white
+            });
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles.forEach((p, i) => {
+                p.x += p.vx;
+                p.y += p.vy;
+
+                if (p.x < 0 || p.x > canvas.width) p.vx *= -1;
+                if (p.y < 0 || p.y > canvas.height) p.vy *= -1;
+
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+
+                // === Make the yellow particles pop more ===
+                if (i < 3) {
+                    ctx.shadowColor = "rgba(255, 215, 0, 1)";
+                    ctx.shadowBlur = 20;
+                    ctx.fillStyle = `rgba(255, 215, 0, ${p.opacity})`; // bright gold
+                } else {
+                    ctx.shadowColor = "transparent";
+                    ctx.shadowBlur = 0;
+                    ctx.fillStyle = `${p.color}${p.opacity})`; // white particles
                 }
+
+                ctx.fill();
             });
+            requestAnimationFrame(animate);
+        }
+
+
+        animate();
+
+        window.addEventListener("resize", () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
         });
     </script>
+
+
+
 </body>
 </html>
