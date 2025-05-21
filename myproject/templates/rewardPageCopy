@@ -17,9 +17,11 @@
       transition: all 0.3s ease;
     }
 
+    /* Optional: Shrink reward container slightly when sidebar is open */
     .side-menu.open + .rewards-container {
-      margin-left: 1px;
+      margin-left:1px;
     }
+
 
     .header {
       text-align: center;
@@ -31,13 +33,13 @@
     }
 
     .rewards-container {
-      padding: 70px;
+      padding: 90px;
       max-width: 700px;
       margin: auto;
       margin-bottom: 0px;
       height: 650px;
-      position: relative;
-      margin-left: 350px;
+      position:relative;
+      margin-left:350px
     }
 
     .badge {
@@ -82,7 +84,6 @@
     .badge span {
       font-size: 0.9em;
     }
-
     .side-menu {
       background-color: rgba(255, 198, 76, 0.85);
       width: 250px;
@@ -92,39 +93,41 @@
       padding-left: 15px;
       padding-right: 15px;
       box-shadow: 2px 0 5px rgba(0, 0, 0, 0.5);
-      display: none;
-      height: 630px;
-      margin-right: 69px;
+      display:none;
+      height:630px;
+      margin-right:69px;
     }
 
+    /* Links inside the sidebar */
     .side-menu a {
-      padding: 15px 0;
-      text-decoration: none;
-      font-size: 24px;
-      color: #fff;
-      display: block;
-      border-radius: 5px;
+        padding: 15px 0;
+        text-decoration: none;
+        font-size: 24px;
+        color: #fff;
+        display: block;
+        border-radius: 5px;
+  
     }
 
     .side-menu a:hover {
-      color: rgb(56, 21, 230);
-      background-color: rgba(255, 255, 255, 0.1);
+        color: rgb(56, 21, 230);
+        background-color: rgba(255, 255, 255, 0.1);
     }
 
+    /* Button to open/close the sidebar (fixed in place) */
     .toggle-btn {
-      font-size: 24px;
-      font-weight: bold;
-      cursor: pointer;
-      color: #fff;
-      padding: 10px 15px;
-      border-radius: 10px;
-      background-color: rgb(62, 79, 226);
-      position: fixed;
-      top: 30px;
-      left: 30px;
-      z-index: 3;
+        font-size: 24px;
+        font-weight: bold;
+        cursor: pointer;
+        color: #fff;
+        padding: 10px 15px;
+        border-radius: 10px;
+        background-color: rgb(62, 79, 226);
+        position: fixed; /* Fix the button in place */
+        top: 30px;
+        left: 30px;
+        z-index: 3;
     }
-
     .side-menu.open {
       display: block;
     }
@@ -140,73 +143,62 @@
       <a href="/calendar">CALENDAR</a>
       <a href="/timeout">TIMEOUT</a>
       <a href="#">SETTINGS</a>
-      <a href="/signout">LOG OUT</a>
+      <a href="/signout">LOG OUT</a>      
     </div>
 
     <div class="rewards-container">
       <div class="badge" id="sage-badge">
-        <img src="{{ url_for('static', filename='badge_beginner.png') }}" alt="Sage Badge">
-        <div>
-          <strong id="sage-title">Beginner</strong>
-          <div class="progress-bar"><div class="progress" id="sage-progress"></div></div>
-          <span id="xp-display">0 XP</span>
-        </div>
+      <img src="{{ url_for('static', filename='badge_beginner.png') }}" alt="Sage Badge">
+      <div>
+        <strong id="sage-title">Beginner</strong>
+        <div class="progress-bar"><div class="progress" id="sage-progress"></div></div>
+        <span id="xp-display">0 XP</span>
       </div>
+    </div>
 
-      <div class="badge" id="streak-badge">
-        <img src="{{ url_for('static', filename='badge_streak.png') }}" alt="Streak Badge">
-        <div>
-          <strong>Streak Star</strong>
-          <div class="progress-bar"><div class="progress" id="streak-progress"></div></div>
-          <span id="streak-display">0 Days</span>
-        </div>
+    <div class="badge" id="streak-badge">
+      <img src="{{ url_for('static', filename='badge_streak.png') }}" alt="Streak Badge">
+      <div>
+        <strong>Streak Star</strong>
+        <div class="progress-bar"><div class="progress" id="streak-progress"></div></div>
+        <span id="streak-display">0 Days</span>
       </div>
+    </div>
 
-      <div class="badge" id="task-tamer-badge">
-        <img src="{{ url_for('static', filename='badge_organizer.png') }}" alt="Task Tamer">
-        <div>
-          <strong>Task Tamer</strong>
-          <div class="progress-bar"><div class="progress" id="task-tamer-progress"></div></div>
-          <span id="task-tamer-display">Complete 10 tasks</span>
-        </div>
+    <div class="badge" id="organizer-badge">
+      <img src="{{ url_for('static', filename='badge_organizer.png') }}" alt="Task Tamer">
+      <div>
+        <strong>Task Tamer</strong>
+        <div class="progress-bar"><div class="progress" id="task-progress"></div></div>
+        <span>Complete 10 tasks</span>
       </div>
+    </div>
 
-      <div class="badge" id="routine-badge">
-        <img src="{{ url_for('static', filename='badge_routineBuilder.png') }}" alt="Routine Builder">
-        <div>
-          <strong>Routine Builder</strong>
-          <div class="progress-bar"><div class="progress" id="routine-progress"></div></div>
-          <span id="routine-created-display">Set 5 recurring tasks</span>
-        </div>
+    <div class="badge" id="routine-badge">
+      <img src="{{ url_for('static', filename='badge_routine.png') }}" alt="Routine Builder">
+      <div>
+        <strong>Routine Builder</strong>
+        <div class="progress-bar"><div class="progress" id="routine-progress"></div></div>
+        <span>Set 5 recurring tasks</span>
       </div>
-      <div class="badge" id="goal-getter-badge">
-        <img src="{{ url_for('static', filename='badge_routine.png') }}" alt="Goal Getter">
-        <div>
-          <strong>Goal Getter</strong>
-          <div class="progress-bar"><div class="progress" id="goal-getter-progress"></div></div>
-          <span id="goal-getter-display">Complete 100 tasks</span>
-        </div>  
-      </div>
-  </div>
-
+    </div>
+    </div>
   <script>
+
+    // Get XP
+    let xp = localStorage.getItem("comp_points") ? parseInt(localStorage.getItem("comp_points")) : 0;
+    document.getElementById('xp-display').textContent = xp + ' XP';
+
+    // Determine Sage Level
+    let sageLevel = "Beginner";
+    let sagePercent = 0;
     function toggleMenu() {
       const sideMenu = document.getElementById("sideMenu");
       sideMenu.classList.toggle("open");
     }
-
-    // XP Logic
-    let xp = localStorage.getItem("comp_points") ? parseInt(localStorage.getItem("comp_points")) : 0;
-    document.getElementById('xp-display').textContent = xp + ' XP';
-
-    let sageLevel = "Beginner";
-    let sagePercent = 0;
-    if (xp>=1000){
-      sageLevel = "King";
-      sagePercent = 100;
-    } else if (xp >= 700) {
+    if (xp >= 700) {
       sageLevel = "Explorer";
-      sagePercent = ((xp - 700) / (1000 - 700)) * 100;
+      sagePercent = 100;
     } else if (xp >= 250) {
       sageLevel = "Journeyor";
       sagePercent = ((xp - 250) / (700 - 250)) * 100;
@@ -216,12 +208,9 @@
     } else {
       sagePercent = (xp / 50) * 100;
     }
-
+    // Determine which badge image to use
     let sageImage = "";
     switch (sageLevel) {
-      case "King":
-        sageImage = "{{ url_for('static', filename='badge_king.png') }}";
-        break;
       case "Explorer":
         sageImage = "{{ url_for('static', filename='badge_explorer.png') }}";
         break;
@@ -236,38 +225,26 @@
         break;
     }
 
-    document.querySelector("#sage-badge img").src = sageImage;
+// Dynamically update image
+document.querySelector("#sage-badge img").src = sageImage;
+
+
     document.getElementById("sage-title").textContent = sageLevel;
     document.getElementById("sage-progress").style.width = `${sagePercent}%`;
 
-    // Streaks
+    // Get streaks
     let streaks = localStorage.getItem("streaks") ? parseInt(localStorage.getItem("streaks")) : 0;
     document.getElementById('streak-display').textContent = streaks + ' Days';
     let streakPercent = Math.min((streaks / 30) * 100, 100);
     document.getElementById("streak-progress").style.width = `${streakPercent}%`;
 
+    // Example task completion (you can update this with your actual logic)
     let tasksCompleted = localStorage.getItem("completed_tasks") ? parseInt(localStorage.getItem("completed_tasks")) : 0;
-    let tamerProgress = Math.min((tasksCompleted / 10) * 100, 100);
-    document.getElementById("task-tamer-progress").style.width = `${tamerProgress}%`;
-    document.getElementById("task-tamer-display").textContent = `Completed ${tasksCompleted} / 10 tasks`;
-    if (tasksCompleted >= 10) {
-      document.getElementById("task-tamer-badge").style.border = "2px solid gold";
-    }
-    // Routine Builder
-    let routinesCreated = localStorage.getItem("routines") ? parseInt(localStorage.getItem("routines")) : 0;
-    document.getElementById("routine-created-display").textContent = `${routinesCreated} / 5 saved tasks`;
-    document.getElementById("routine-progress").style.width = `${Math.min((routinesCreated / 5) * 100, 100)}%`;
-    // --- Goal Getter Badge (Complete 100 Tasks) ---
-    let goalProgress = Math.min((tasksCompleted / 100) * 100, 100);
-    document.getElementById("goal-getter-progress").style.width = `${goalProgress}%`;
-    document.getElementById("goal-getter-display").textContent = `Completed ${tasksCompleted} / 100 tasks`;
-    if (tasksCompleted >= 100) {
-      document.getElementById("goal-getter-badge").style.border = "2px solid gold";
-    }
-    if (xp >= 1000) {
-      document.getElementById("sage-badge").style.border = "2px solid gold";
-    }
+    document.getElementById("task-progress").style.width = `${Math.min((tasksCompleted / 10) * 100, 100)}%`;
 
+    // Example routine count
+    let routinesCreated = localStorage.getItem("routines") ? parseInt(localStorage.getItem("routines")) : 0;
+    document.getElementById("routine-progress").style.width = `${Math.min((routinesCreated / 5) * 100, 100)}%`;
   </script>
 </body>
 </html>

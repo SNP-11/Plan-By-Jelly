@@ -8,6 +8,8 @@ document.addEventListener('DOMContentLoaded', function() {
     let weekOffset = 0;
     let comp_points = localStorage.getItem("comp_points") ? parseInt(localStorage.getItem("comp_points")) : 0;
     let streaks = localStorage.getItem("streaks") ? parseInt(localStorage.getItem("streaks")) : 0;
+
+
     $("#comp_points").text(comp_points);
     $("#streaks").text(streaks);
     
@@ -316,6 +318,11 @@ document.addEventListener('DOMContentLoaded', function() {
             urgency: $("select#urgency").val(),
             save_task: $("input#save_task").is(":checked") ? 1 : 0
         }, function(response) {
+            if ($("input#save_task").is(":checked")) {
+                let routines = localStorage.getItem("routines") ? parseInt(localStorage.getItem("routines")) : 0;
+                localStorage.setItem("routines", routines + 1);
+            }
+
             console.log("Raw server response:", response);
     
             if (response.id && response.label && response.start_time && response.end_time) {
@@ -496,6 +503,8 @@ document.addEventListener('DOMContentLoaded', function() {
         checkmark.addEventListener('click', function(event) {
             let comp_points = localStorage.getItem("comp_points") ? parseInt(localStorage.getItem("comp_points")) : 0;
             let streaks  = localStorage.getItem("streaks") ? parseInt(localStorage.getItem("streaks")) : 0;
+            let tasksCompleted = localStorage.getItem("completed_tasks") ? parseInt(localStorage.getItem("completed_tasks")) : 0;
+            localStorage.setItem("completed_tasks", tasksCompleted + 1);
             let last_streak = localStorage.getItem("last_streak") ? localStorage.getItem("last_streak") : 0;
             let current_time = Math.floor(Date.now() / 1000); // Current time in seconds
             let last_streak_time = parseInt(last_streak);
