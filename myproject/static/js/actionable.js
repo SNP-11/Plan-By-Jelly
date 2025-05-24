@@ -99,31 +99,22 @@ function dblClickDiv(event) {
 }
 
 const convertUnixToReadable = (unixTimestamp) => {
+    if (!unixTimestamp || isNaN(unixTimestamp)) {
+        console.warn("Invalid timestamp:", unixTimestamp);
+        return "Invalid time";
+    }
+
     const date = new Date(unixTimestamp * 1000);
 
     const formatter = new Intl.DateTimeFormat('en-US', {
-        hour:'2-digit',
-        minute:'2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
         hour12: true
     });
-    return (formatter.format(date))
 
-    // Get day of the week and month name using arrays
-    const dayOfWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][date.getDay()];
-    const monthName = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'][date.getMonth()];
-    
-    // Extract year, day, and time components
-    const year = date.getFullYear();
-    const day = String(date.getDate()).padStart(2, '0');
-    const hours = String(formatter.format(date).getHours()).padStart(2, '0');
-    const minutes = String(date.getMinutes()).padStart(2, '0');
-    const seconds = String(date.getSeconds()).padStart(2, '0');
-    // Format the full readable date as "Day DD Month YYYY HH:MM:SS"
-    // return `${dayOfWeek} ${day} ${monthName} ${year} ${hours}:${minutes}:${seconds}`;
-    return `${hours}:${minutes}`;
+    return formatter.format(date);
+};
 
-
-}
 
 
 
