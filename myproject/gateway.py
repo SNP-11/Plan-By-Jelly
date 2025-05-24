@@ -131,7 +131,7 @@ def view_users():
 def home():
     if 'username' not in session:
         return redirect(url_for('index'))
-    return render_template('HomeG.html')
+    return render_template('homeG.html')
 
 @app.route("/sunday")
 def sunday():

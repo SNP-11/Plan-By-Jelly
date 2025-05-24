@@ -78,34 +78,39 @@
                                             </span></span>
                                     </div>
                                 </div>
-                                <div class="wrapper sunday-modal-content">
-                                    
+                               <div class="wrapper sunday-modal-content">
                                     <div class="input-container">
                                         <div class="input-group">
-                                            <div class="star-checkbox-container">
-                                                <input type="checkbox" id="save_task" class="star-checkbox">
-                                                <label for="save_task" class="star-label material-icons">star</label>
-                                            </div>
-                                            <div class = "completion" id = "checkmark">
-                                                <input 
-                                                    type = "button" 
-                                                    class = "completion-button" 
-                                                    id = "completion-button" 
-                                                    value = "⚡Complete⚡"  
-                                                    style="border-color: #ffe600; color: white; border-radius: 7px; border-width: 2px; padding: 7px 7px; font-size: 16px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 6px;"
 
+                                            <!-- Completion Button in Top Left -->
+                                            <div class="completion" id="checkmark" style="margin-bottom: 20px;">
+                                                <input 
+                                                    type="button" 
+                                                    class="completion-button" 
+                                                    id="completion-button" 
+                                                    value="⚡Complete⚡"
+                                                    style="border-color: #ffe600; color: white; border-radius: 7px; margin-left:115px; border-width: 2px; padding: 7px 90px; font-size: 16px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 6px;"
                                                 >
                                             </div>
-                                            
+
+                                            <!-- Time Inputs and Buttons Row -->
                                             <div class="task-input-wrapper">
-                                                <div class="task-input-group">
-                                                    <input type="datetime-local" id="start_time" name="start_time" placeholder = "START TIME" class="form-control datetime-input">
-                                                    <input type="datetime-local" id="end_time" name="end_time" class="form-control datetime-input">
+                                                <!-- Start and End Time Inputs with Labels -->
+                                                <div class="task-input-group" style="display: flex; gap: 15px;">
+                                                    <div class="datetime-field" style="display: flex; flex-direction: column;">
+                                                        <label for="start_time" style="color: white; margin-bottom: 4px;">Start Time:</label>
+                                                        <input type="datetime-local" id="start_time" name="start_time" class="form-control datetime-input">
+                                                    </div>
+                                                    <div class="datetime-field" style="display: flex; flex-direction: column;">
+                                                        <label for="end_time" style="color: white; margin-bottom: 4px;">End Time:</label>
+                                                        <input type="datetime-local" id="end_time" name="end_time" class="form-control datetime-input">
+                                                    </div>
                                                 </div>
-                                                
+
+                                                <!-- Add & Remove Buttons -->
                                                 <div class="button-group">
                                                     <button class="add-button" id="addButton" type="button">
-                                                        <span class="material-symbols-outlined">library_add</span>
+                                                        <span class="material-symbols-outlined" style="font-size:30px">add</span>
                                                     </button>
                                                     <button id="removeButton" class="icon-button">
                                                         <span class="material-symbols-outlined">delete</span>
@@ -114,33 +119,28 @@
                                             </div>
                                         </div>
                                     </div>
-                                    
-                                        <div id="autoCompletes">
-                                            <div class="accordion d-none" id = "dummyAccordion">
-                                                <div class = "accordion-item">
-                                                    <h2 class="accordion-header">
-                                                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" aria-expanded="false" aria-controls="collapseOne">
-                                                        Accordion Item #1
-                                                        </button>
-                                                    </h2>
-                                                    <div id="collapseOne" class="accordion-collapse collapse">
-                                                        <div class="accordion-body">
-                                                            <div class="date-label"> </div>
-                                                            <div class="date-urgency"></div>
-                                                            <button class = "autoCompleteButton">ADD</button>
-                                                           
 
-                                                        </div>
+                                    <!-- Accordion Section -->
+                                    <div id="autoCompletes">
+                                        <div class="accordion d-none" id="dummyAccordion">
+                                            <div class="accordion-item">
+                                                <h2 class="accordion-header">
+                                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" aria-expanded="false" aria-controls="collapseOne">
+                                                        Accordion Item #1
+                                                    </button>
+                                                </h2>
+                                                <div id="collapseOne" class="accordion-collapse collapse">
+                                                    <div class="accordion-body">
+                                                        <div class="date-label"> </div>
+                                                        <div class="date-urgency"></div>
+                                                        <button class="autoCompleteButton">ADD</button>
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
-                                    <div class="input-container">
-                                                                           <!-- <input type="text" class="reminder-box" id="reminder-box" required placeholder=" "> -->
-                                        <!-- <label for="reminder-box">Enter a reminder</label> -->
                                     </div>
-                                    <!-- <button class="add-button">Add</button> -->
                                 </div>
+
                               </div> <!-- This is where we will load sunday.html content -->
                           </div>
                       </div>

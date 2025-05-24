@@ -417,6 +417,7 @@ mark{
     cursor: pointer; /* Change cursor to pointer */
     padding: 5px; /* Add some padding */
     transition: transform 0.2s ease, color 0.2s ease; /* Add hover effect */
+    margin-top: 28px;
 }
 
 #addButton:hover {
@@ -494,6 +495,7 @@ mark{
     border-radius: 5px;
     width: 40px; /* Fixed width for square button */
     height: 40px; /* Fixed height to make it square */
+    margin-top:34px;
 }
 
 /* Hover effects for Add and Remove buttons */
@@ -552,4 +554,30 @@ mark{
     font-size: 16px;
     box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.2);
     opacity: 1; /* Ensure opacity is set to 1 */
+}
+.completion-time-wrapper {
+    display: flex;
+    align-items: flex-start;
+    gap: 20px; /* spacing between completion and time inputs */
+    flex-wrap: wrap;
+    width: 100%;
+}
+
+.datetime-inputs {
+    display: flex;
+    flex-direction: row;
+    gap: 15px; /* spacing between start and end inputs */
+    align-items: flex-start;
+}
+
+.datetime-field {
+    display: flex;
+    flex-direction: column;
+    color: white;
+    font-size: 14px;
+}
+
+.datetime-field label {
+    margin-bottom: 4px;
+    color: white;
 }
