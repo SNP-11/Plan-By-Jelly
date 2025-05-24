@@ -478,7 +478,7 @@ mark{
     height: 40px; /* Fixed height to make it square */
     background-color: #007bff;
     border-radius: 5px;
-
+    margin-top: 29px; /* Adjust top margin */
 
 }
 
