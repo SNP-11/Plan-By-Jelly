@@ -7,6 +7,8 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/login.css') }}">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.4/gsap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.4/ScrollTrigger.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
 </head>
 <body>
     <div class="container">
@@ -19,8 +21,9 @@
                 <div class="input-container">
                     <input type="text" id="username" name="username" placeholder="username" required>
                 </div>
-                <div class="input-container">
+                <div class="input-container" style="position: relative;">
                     <input type="password" id="password" name="password" placeholder="password" required>
+                    <i class="fa-solid fa-eye-slash" id="togglePassword" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); cursor: pointer;"></i>
                 </div>
                 <input type="submit" value="Login">
             </form>
@@ -66,7 +69,19 @@
             duration: 0.8,
             ease: "back.out(1.7)"
         });
+         const togglePassword = document.getElementById("togglePassword");
+        const password = document.getElementById("password");
 
+        togglePassword.addEventListener("click", function () {
+            // Toggle the type attribute
+            const type = password.getAttribute("type") === "password" ? "text" : "password";
+            password.setAttribute("type", type);
+
+            // Toggle the eye / eye-slash icon
+            this.classList.toggle("fa-eye-slash");
+            this.classList.toggle("fa-eye");
+            
+        });
         // === Particle Canvas with 3 Yellow Particles ===
         const canvas = document.createElement("canvas");
         document.body.appendChild(canvas);
