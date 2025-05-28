@@ -21,6 +21,15 @@
                 <div class="input-container">
                     <input type="text" id="username" name="username" placeholder="username" required>
                 </div>
+                    {% with messages = get_flashed_messages(with_categories=true) %}
+                        {% if messages %}
+                            {% for category, message in messages %}
+                                <div class="flash-message">
+                                {{ message }}
+                                </div>
+                            {% endfor %}
+                        {% endif %}
+                    {% endwith %}
                 <div class="input-container" style="position: relative;">
                     <input type="password" id="password" name="password" placeholder="password" required>
                     <i class="fa-solid fa-eye-slash" id="togglePassword" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); cursor: pointer;"></i>

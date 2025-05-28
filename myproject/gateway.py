@@ -70,30 +70,30 @@ def index():
 def login():
     username = request.form['username']
     password = request.form['password']
-    print(f"Login attempt - Username: {username}, Password: {password}")  # Debug statement
+    print(f"Login attempt - Username: {username}, Password: {password}")
+
     with get_db_connection() as conn:
         cursor = conn.cursor()
         cursor.execute('SELECT * FROM users WHERE username = ?', (username,))
         user = cursor.fetchone()
-        id = user[0]
-        print(f"Fetched user: {user}")  # Debug statement
 
     if user:
+        id = user[0]
         stored_password = user[2]
-        print(f"Stored password hash: {stored_password}")  # Debug statement
+        print(f"Fetched user: {user}")
+        print(f"Stored password hash: {stored_password}")
+
         if check_password_hash(stored_password, password):
             session['username'] = username
-            session['uid'] = id 
+            session['uid'] = id
             flash('Login successful!', 'success')
-            return redirect(url_for('home'))  # Redirect to a secure page on successful login
-        else:
-            flash('Invalid username or password', 'danger')
-            print('Password mismatch - Entered Password:', password)  # Debug statement
-            print('Password mismatch - Stored Password Hash:', stored_password)  # Debug statement
-    else:
-        flash('User not found', 'danger')
-        print('User not found')  # Debug statement
+            return redirect(url_for('home'))
+    
+    # Flash this for any failure (username not found or password mismatch)
+    flash('Your username or password was incorrect.', 'danger')
     return redirect(url_for('index'))
+
+
 
 @app.route('/logout')
 def logout():
