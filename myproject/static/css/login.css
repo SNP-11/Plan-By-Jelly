@@ -47,8 +47,8 @@ h1, h5, form {
 .gradient-text {
     background: linear-gradient(to right, #7306c1, #8A2BE2); /* Dark purple gradient */
     -webkit-background-clip: text;
-    background-clip: text; 
-    -webkit-text-fill-color: transparent; 
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
 }
 
 h1 {
@@ -164,6 +164,37 @@ span {
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(-10px); }
   to { opacity: 1; transform: translateY(0); }
+}
+
+.google-login-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 80%;
+    padding: 12px 20px;
+    margin: 10px auto;
+    border: 2px solid #dadce0;
+    border-radius: 25px;
+    background-color: #fff;
+    color: #3c4043;
+    text-decoration: none;
+    font-size: 16px;
+    font-weight: 500;
+    font-family: 'Roboto', sans-serif;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.google-login-btn:hover {
+    background-color: #f8f9fa;
+    border-color: #dadce0;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    text-decoration: none;
+}
+
+.google-login-btn svg {
+    margin-right: 12px;
+    flex-shrink: 0;
 }
 
 
