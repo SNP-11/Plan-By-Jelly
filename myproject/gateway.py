@@ -7,10 +7,6 @@ from werkzeug.security import generate_password_hash, check_password_hash
 #from config import Config
 from controllers.tasks import TaskController
 from db_config import db, app, render_template, request, redirect, url_for, flash, session, jsonify
-from services.google_auth import GoogleAuthService
-
-# Allow HTTP for OAuth in development (required for localhost)
-os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
 
 
 @app.route('/QOTD')
@@ -37,13 +33,9 @@ def create_db():
     conn.execute('''\
                  CREATE TABLE users (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    username TEXT UNIQUE,
-                    password TEXT,
-                    email TEXT UNIQUE,
-                    google_id TEXT UNIQUE,
-                    name TEXT,
-                    picture TEXT,
-                    auth_type TEXT DEFAULT 'local'
+                    username TEXT NOT NULL UNIQUE,
+                    password TEXT NOT NULL,
+                    tutorial_completed INTEGER DEFAULT 0
                  );\
                  ''')
     conn.execute('''\
@@ -107,69 +99,8 @@ def login():
 @app.route('/logout')
 def logout():
     session.pop('username', None)
-    session.pop('uid', None)
-    session.pop('auth_type', None)
-    session.pop('oauth_state', None)
     flash('You have been logged out.', 'success')
     return redirect(url_for('index'))
-
-@app.route('/google_login')
-def google_login():
-    """Initiate Google OAuth login"""
-    try:
-        google_auth = GoogleAuthService()
-        authorization_url, state = google_auth.get_authorization_url()
-        session['oauth_state'] = state
-        return redirect(authorization_url)
-    except Exception as e:
-        flash('Failed to initiate Google login. Please try again.', 'danger')
-        return redirect(url_for('index'))
-
-@app.route('/google_callback')
-def google_callback():
-    """Handle Google OAuth callback"""
-    google_auth = GoogleAuthService()
-
-    # Get user info from Google
-    user_info = google_auth.get_user_info(request.url)
-
-    if not user_info:
-        flash('Google authentication failed. Please try again.', 'danger')
-        return redirect(url_for('index'))
-
-    # Check if user exists in database
-    with get_db_connection() as conn:
-        cursor = conn.cursor()
-        cursor.execute('SELECT * FROM users WHERE google_id = ? OR email = ?',
-                      (user_info['google_id'], user_info['email']))
-        user = cursor.fetchone()
-
-        if user:
-            # User exists, log them in
-            user_id = user[0]
-            username = user[1] or user_info['name']  # Use name if no username
-        else:
-            # Create new user
-            try:
-                cursor.execute('''INSERT INTO users (email, google_id, name, picture, auth_type)
-                                 VALUES (?, ?, ?, ?, ?)''',
-                              (user_info['email'], user_info['google_id'],
-                               user_info['name'], user_info['picture'], 'google'))
-                conn.commit()
-                user_id = cursor.lastrowid
-                username = user_info['name']
-            except sqlite3.IntegrityError:
-                flash('Account creation failed. Email may already be in use.', 'danger')
-                return redirect(url_for('index'))
-
-    # Set session variables
-    session['username'] = username
-    session['uid'] = user_id
-    session['auth_type'] = 'google'
-    session.pop('oauth_state', None)  # Clean up
-
-    flash('Successfully logged in with Google!', 'success')
-    return redirect(url_for('home'))
 
 @app.route('/signup', methods=['GET', 'POST'])
 def signup():
@@ -302,20 +233,21 @@ def timeout():
 def reward():
     return render_template('rewardPage.html')
 
+@app.route('/tutorial_completed', methods=['POST'])
+def tutorial_completed():
+    if 'username' not in session:
+        return jsonify({'error': 'Not logged in'}), 401
+
+    # Optional: You could store tutorial completion in database here
+    # For now, we're using localStorage on the frontend
+    return jsonify({'status': 'success'})
+
 @app.route('/signout')
 def signout():
         session.clear()  # Clear all session data
         return redirect(url_for('index'))
 
 if __name__ == '__main__':
-    import os
-    debug_mode = os.environ.get('FLASK_ENV') != 'production'
-
-    if debug_mode:
-        print("Starting Flask app in development mode...")
-        app.run(debug=True, host='localhost', port=5000)
-    else:
-        print("Starting Flask app in production mode...")
-        app.run(debug=False, host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
+    app.run(debug=True)
 
 

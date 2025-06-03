@@ -1,7 +1,0 @@
-Flask==3.0.0
-Flask-SQLAlchemy==3.1.1
-Werkzeug==3.0.1
-google-auth-oauthlib==1.2.2
-google-auth==2.40.2
-requests==2.32.3
-python-dotenv==1.1.0
