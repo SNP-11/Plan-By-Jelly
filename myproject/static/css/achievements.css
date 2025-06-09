@@ -1,0 +1,296 @@
+/* Achievement Notification Styles */
+.achievement-notification {
+    position: fixed;
+    top: 20px;
+    right: -400px;
+    width: 350px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    z-index: 10000;
+    transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    overflow: hidden;
+    font-family: 'Poppins', sans-serif;
+    border: 2px solid #ffd700;
+}
+
+.achievement-notification.show {
+    right: 20px;
+    animation: achievementBounce 0.6s ease-out;
+}
+
+.achievement-notification.hide {
+    right: -400px;
+    opacity: 0;
+}
+
+.achievement-content {
+    display: flex;
+    align-items: center;
+    padding: 20px;
+    color: white;
+    position: relative;
+}
+
+.achievement-icon {
+    font-size: 40px;
+    margin-right: 15px;
+    animation: achievementIconPulse 2s infinite;
+}
+
+.achievement-text {
+    flex: 1;
+}
+
+.achievement-title {
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #ffd700;
+    margin-bottom: 5px;
+}
+
+.achievement-name {
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 5px;
+    color: white;
+}
+
+.achievement-description {
+    font-size: 14px;
+    opacity: 0.9;
+    line-height: 1.4;
+}
+
+.achievement-close {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    font-size: 20px;
+    cursor: pointer;
+    color: rgba(255, 255, 255, 0.7);
+    transition: color 0.3s ease;
+    width: 25px;
+    height: 25px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.achievement-close:hover {
+    color: white;
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.achievement-progress-bar {
+    height: 4px;
+    background: rgba(255, 255, 255, 0.2);
+    position: relative;
+    overflow: hidden;
+}
+
+.achievement-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #ffd700, #ffed4e);
+    width: 0%;
+    transition: width 2s ease-out;
+    position: relative;
+}
+
+.achievement-progress-fill::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+    animation: achievementShimmer 2s ease-out;
+}
+
+/* Animations */
+@keyframes achievementBounce {
+    0% {
+        transform: translateX(100px) scale(0.8);
+        opacity: 0;
+    }
+    50% {
+        transform: translateX(-10px) scale(1.05);
+    }
+    100% {
+        transform: translateX(0) scale(1);
+        opacity: 1;
+    }
+}
+
+@keyframes achievementIconPulse {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.1);
+    }
+}
+
+@keyframes achievementShimmer {
+    0% {
+        transform: translateX(-100%);
+    }
+    100% {
+        transform: translateX(100%);
+    }
+}
+
+/* Multiple notifications stacking */
+.achievement-notification:nth-child(n+2) {
+    top: calc(20px + (90px * var(--notification-index, 1)));
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+    .achievement-notification {
+        width: calc(100vw - 40px);
+        right: -100vw;
+        left: 20px;
+    }
+    
+    .achievement-notification.show {
+        right: 20px;
+    }
+    
+    .achievement-notification.hide {
+        right: -100vw;
+    }
+    
+    .achievement-content {
+        padding: 15px;
+    }
+    
+    .achievement-icon {
+        font-size: 35px;
+        margin-right: 12px;
+    }
+    
+    .achievement-name {
+        font-size: 16px;
+    }
+    
+    .achievement-description {
+        font-size: 13px;
+    }
+}
+
+/* Special achievement types */
+.achievement-notification.rare {
+    background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+    border-color: #ff9ff3;
+}
+
+.achievement-notification.epic {
+    background: linear-gradient(135deg, #a55eea 0%, #8b5cf6 100%);
+    border-color: #feca57;
+    box-shadow: 0 10px 30px rgba(139, 92, 246, 0.4);
+}
+
+.achievement-notification.legendary {
+    background: linear-gradient(135deg, #ffd700 0%, #ff8c00 100%);
+    border-color: #fff;
+    color: #333;
+    box-shadow: 0 10px 30px rgba(255, 215, 0, 0.5);
+}
+
+.achievement-notification.legendary .achievement-title,
+.achievement-notification.legendary .achievement-name,
+.achievement-notification.legendary .achievement-description {
+    color: #333;
+}
+
+.achievement-notification.legendary .achievement-close {
+    color: rgba(51, 51, 51, 0.7);
+}
+
+.achievement-notification.legendary .achievement-close:hover {
+    color: #333;
+}
+
+/* Celebration effects */
+.achievement-celebration {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 9999;
+}
+
+.achievement-confetti {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    background: #ffd700;
+    animation: achievementConfetti 3s ease-out forwards;
+}
+
+@keyframes achievementConfetti {
+    0% {
+        transform: translateY(-100vh) rotate(0deg);
+        opacity: 1;
+    }
+    100% {
+        transform: translateY(100vh) rotate(720deg);
+        opacity: 0;
+    }
+}
+
+/* Toast-style alternative (smaller notifications) */
+.achievement-notification.toast {
+    width: 280px;
+    background: rgba(0, 0, 0, 0.9);
+    border: 1px solid #ffd700;
+}
+
+.achievement-notification.toast .achievement-content {
+    padding: 12px 15px;
+}
+
+.achievement-notification.toast .achievement-icon {
+    font-size: 24px;
+    margin-right: 10px;
+}
+
+.achievement-notification.toast .achievement-name {
+    font-size: 14px;
+}
+
+.achievement-notification.toast .achievement-description {
+    font-size: 12px;
+}
+
+/* Sound wave effect for audio feedback */
+.achievement-sound-wave {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 60px;
+    height: 60px;
+    border: 2px solid rgba(255, 215, 0, 0.6);
+    border-radius: 50%;
+    animation: achievementSoundWave 1s ease-out;
+}
+
+@keyframes achievementSoundWave {
+    0% {
+        transform: translate(-50%, -50%) scale(0);
+        opacity: 1;
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(3);
+        opacity: 0;
+    }
+}
