@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>ASCII Donut</title>
+  <style>
+    body {
+      background-color: black;
+      color: white;
+      font-family: monospace;
+      white-space: pre;
+      font-size: 16px;
+      overflow: hidden;
+    }
+    pre {
+      line-height: 10px;
+      margin: 0;
+    }
+    #donut {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+    .color0 { color: #300587; }
+    .color1 { color: #3c0b9f; }
+    .color2 { color: #a77000; }
+    .color3 { color: #4a50ef; }
+    .color4 { color: #6761ff; }
+    .color5 { color: #ffd045; }
+    .color6 { color: #aeadfa; }
+    .color7 { color: rgb(255, 219, 156); }
+  </style>
+</head>
+<body>
+  <pre id="donut"></pre>
+  <script>
+    const pre = document.getElementById("donut");
+
+    const screen_width = 90;
+    const screen_height = 90;
+    const theta_spacing = 0.07;
+    const phi_spacing = 0.02;
+
+    const R1 = 1;
+    const R2 = 2;
+    const K2 = 5;
+    const K1 = screen_width * K2 * 3 / (8 * (R1 + R2));
+    const luminance = ".,-~:;=!*#$@";
+
+    let A = 0, B = 0;
+
+    function render_frame() {
+      const output = Array(screen_width * screen_height).fill(' ');
+      const zbuffer = Array(screen_width * screen_height).fill(0);
+      const colorMap = Array(screen_width * screen_height).fill('');
+
+      for (let theta = 0; theta < 2 * Math.PI; theta += theta_spacing) {
+        const costheta = Math.cos(theta);
+        const sintheta = Math.sin(theta);
+
+        for (let phi = 0; phi < 2 * Math.PI; phi += phi_spacing) {
+          const cosphi = Math.cos(phi);
+          const sinphi = Math.sin(phi);
+
+          const circlex = R2 + R1 * costheta;
+          const circley = R1 * sintheta;
+
+          const x = circlex * (Math.cos(B) * cosphi + Math.sin(A) * Math.sin(B) * sinphi) - circley * Math.cos(A) * Math.sin(B);
+          const y = circlex * (Math.sin(B) * cosphi - Math.sin(A) * Math.cos(B) * sinphi) + circley * Math.cos(A) * Math.cos(B);
+          const z = K2 + Math.cos(A) * circlex * sinphi + circley * Math.sin(A);
+          const ooz = 1 / z;
+
+          const xp = Math.floor(screen_width / 2 + K1 * ooz * x);
+          const yp = Math.floor(screen_height / 2 - K1 * ooz * y);
+          const idx = xp + screen_width * yp;
+
+          const L = cosphi * costheta * Math.sin(B) - Math.cos(A) * costheta * sinphi - Math.sin(A) * sintheta + Math.cos(B) * (Math.cos(A) * sintheta - costheta * Math.sin(A) * sinphi);
+
+          if (L > 0 && xp >= 0 && xp < screen_width && yp >= 0 && yp < screen_height) {
+            if (ooz > zbuffer[idx]) {
+              zbuffer[idx] = ooz;
+              const luminance_index = Math.floor(L * 8);
+              output[idx] = luminance[luminance_index % luminance.length];
+              colorMap[idx] = `color${Math.min(luminance_index, 7)}`;
+            }
+          }
+        }
+      }
+
+      let text = '';
+      for (let j = 0; j < screen_height; j++) {
+        for (let i = 0; i < screen_width; i++) {
+          const idx = i + screen_width * j;
+          const char = output[idx];
+          const color = colorMap[idx] || 'color0';
+          text += `<span class="${color}">${char}</span>`;
+        }
+        text += '\n';
+      }
+      pre.innerHTML = text;
+      A += 0.04;
+      B += 0.06;
+    }
+
+    setInterval(render_frame, 60);
+  </script>
+</body>
+</html>

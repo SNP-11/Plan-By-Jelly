@@ -12,8 +12,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
     $("#comp_points").text(comp_points);
     $("#streaks").text(streaks);
-
-
+    
+  
     function getSundayStartOfWeek() {
         const now = new Date();
         const dayOfWeek = now.getDay(); // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
@@ -35,7 +35,7 @@ document.addEventListener('DOMContentLoaded', function() {
         startDay = parseInt(localStorage.getItem('startDay'));
         localStorage.removeItem('startDay');
     }
-
+    
     // Function to update the days of the week displayed on the page
     function updateWeekdays() {
         const daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
@@ -80,30 +80,30 @@ document.addEventListener('DOMContentLoaded', function() {
         const daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
         const sunday = new Date(startingDate);
         sunday.setDate(sunday.getDate() - sunday.getDay()); // Get the Sunday of the selected week
-
+    
         const today = new Date(); // Recalculate today's date
         today.setHours(0, 0, 0, 0); // Normalize to midnight for comparison
-
+    
         console.log("Today:", today); // Log today's normalized date
         console.log("Week Offset:", weekOffset); // Log the current week offset
-
+    
         for (let i = 0; i < 7; i++) {
             const date = new Date(sunday);
             date.setDate(sunday.getDate() + i); // Get each day of the week
             date.setHours(0, 0, 0, 0); // Normalize to midnight for comparison
-
+    
             const dayLabel = document.getElementById(`day${i + 1}`);
             const dayColumn = document.getElementById(`column${i + 1}`);
-
+    
             if (dayLabel && dayColumn) {
                 // Update the label to show weekday and date
                 dayLabel.innerText = `${daysOfWeek[date.getDay()]} ${date.getDate()}`;
                 dayColumn.dataset.date = Math.floor(date.getTime() / 1000); // Store timestamp
                 console.log(`Day ${i + 1}: ${date}, Label: ${dayLabel.innerText}`);
-
+    
                 // Clear old tasks before loading new ones
                 dayColumn.innerHTML = "";
-
+    
                 // Highlight the current day only if it matches today's date and the current week
                 if (date.getTime() === today.getTime() && weekOffset === 0) {
                     console.log("Highlighting current day:", dayLabel.innerText);
@@ -114,7 +114,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     dayColumn.parentNode.style.border = "none";
                     dayLabel.parentNode.style.border = "none";
                 }
-
+    
                 // Load smallDivs for the selected week
                 loadTasksForDate(date, dayColumn);
             } else {
@@ -141,21 +141,21 @@ document.addEventListener('DOMContentLoaded', function() {
     function changeWeek(days) {
         currentWeekStart.setDate(currentWeekStart.getDate() + days);
         weekOffset += days / 7; // Update weekOffset based on the number of days
-
+    
         console.log("Week Offset after change:", weekOffset); // Debugging log
-
+    
         // Reset weekOffset to 0 if we're back to the current week
         if (weekOffset === 0) {
             currentWeekStart = new Date(); // Reset to the current week's start
             currentWeekStart.setDate(currentWeekStart.getDate() - currentWeekStart.getDay());
             currentWeekStart.setHours(0, 0, 0, 0);
-
+    
             console.log("Resetting to current week. Current Week Start:", currentWeekStart);
         }
-
+    
         // Update the weekdays displayed on the page
         updateWeekdaysWithWeek(currentWeekStart);
-
+    
         // Fetch and display tasks for the new week
         console.log("Reloading tasks for the new week...");
         getTasks();
@@ -250,7 +250,7 @@ document.addEventListener('DOMContentLoaded', function() {
         };
         xhr.send();
     }
-
+    
     // Function to update the smallDiv with the response text
     function updateSmallDiv(data) {
         var smallDiv = document.querySelector('.smallDiv');
@@ -302,7 +302,7 @@ document.addEventListener('DOMContentLoaded', function() {
     window.addEventListener('mouseup', function() {
         isDragging = false;
     });
-
+    
     document.getElementById("addButton").addEventListener('click', (event) => addTask(event));
     document.getElementById("removeButton").addEventListener('click', (event) => removeTask(event));
 
@@ -310,7 +310,7 @@ document.addEventListener('DOMContentLoaded', function() {
     function addTask(event) {
         const start_time = convertToUTC($("input[name='start_time']").val());
         const end_time = convertToUTC($("input[name='end_time']").val());
-
+    
         $.post('/add_task', {
             label: $("input[name='label']").val(),
             start_time: start_time,
@@ -321,15 +321,10 @@ document.addEventListener('DOMContentLoaded', function() {
             if ($("input#save_task").is(":checked")) {
                 let routines = localStorage.getItem("routines") ? parseInt(localStorage.getItem("routines")) : 0;
                 localStorage.setItem("routines", routines + 1);
-
-                // Check for achievements after creating routine
-                if (typeof achievementSystem !== 'undefined') {
-                    achievementSystem.checkAchievements();
-                }
             }
 
             console.log("Raw server response:", response);
-
+    
             if (response.id && response.label && response.start_time && response.end_time) {
                 taskCount++;
                 add_taskDiv(response, taskCount - 1);
@@ -342,24 +337,24 @@ document.addEventListener('DOMContentLoaded', function() {
     function removeTask(event) {
         const taskId = event.currentTarget.dataset.task_id; // Use currentTarget instead of srcElement
         console.log("Removing task with ID:", taskId);
-
+    
         if (!taskId) {
             console.error("Task ID is missing. Cannot delete task.");
             return;
         }
-
+    
         // Remove the task from the savedTasks array
         const taskIndex = savedTasks.findIndex(task => task.id === `autoComplete${taskId}`);
         if (taskIndex !== -1) {
             savedTasks.splice(taskIndex, 1); // Remove the task from the array
         }
-
+    
         // Remove the task element from the DOM
         const taskElement = document.getElementById(`autoComplete${taskId}`);
         if (taskElement) {
             taskElement.remove();
         }
-
+    
         // Send a request to the server to delete the task
         $.post('/delete_task', { id: taskId }, function (response) {
             console.log("Task removed:", response);
@@ -367,7 +362,7 @@ document.addEventListener('DOMContentLoaded', function() {
             window.location.reload(); // Reload the page to reflect changes
         });
     }
-
+    
     // Function to toggle the sidebar menu
     function toggleMenu() {
         const sideMenu = document.getElementById("sideMenu");
@@ -388,7 +383,7 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById("sideMenu").style.display = "none";
         document.getElementById("toggleButton").innerHTML = "&#9681;";
     });
-
+    
     // Attach the toggleMenu function to the toggle button
     document.getElementById("toggleButton").onclick = toggleMenu;
 
@@ -399,22 +394,22 @@ document.addEventListener('DOMContentLoaded', function() {
             type: "POST",
             url: "/get_tasks",
             success: function(data) {
-                console.log("Retrieved tasks:", data);
+                console.log("Retrieved tasks:", data); 
                 tasks = data;
                 taskCount = data.length;
-
+    
                 // Calculate the start and end of the selected week
                 let startOfWeek = new Date();
                 startOfWeek.setDate((startOfWeek.getDate() - startOfWeek.getDay()) + weekOffset * 7); // Adjust for weekOffset
                 startOfWeek.setHours(0, 0, 0, 0);
-
+    
                 let endOfWeek = new Date(startOfWeek);
                 endOfWeek.setDate(endOfWeek.getDate() + 6); // End of the week
                 endOfWeek.setHours(23, 59, 59, 999);
-
+    
                 console.log("Start of Week:", startOfWeek);
                 console.log("End of Week:", endOfWeek);
-
+    
                 // Clear all task columns before adding new tasks
                 for (let i = 1; i <= 7; i++) {
                     const dayColumn = document.getElementById(`column${i}`);
@@ -423,15 +418,15 @@ document.addEventListener('DOMContentLoaded', function() {
                     }
                     console.log(`Cleared tasks for column ${i}`);
                 }
-
+    
                 // Filter tasks for the selected week
                 let tasksToShow = tasks.filter(task => {
                     const taskStartTime = task.start_time * 1000; // Convert to milliseconds
                     return taskStartTime >= startOfWeek.getTime() && taskStartTime <= endOfWeek.getTime();
                 });
-
+    
                 console.log("Tasks to show for the selected week:", tasksToShow);
-
+    
                 // Display the filtered tasks
                 tasksToShow.forEach((task, i) => {
                     add_taskDiv(task, i);
@@ -444,13 +439,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     getTasks();
-
-    // Check for achievements on page load
-    setTimeout(() => {
-        if (typeof achievementSystem !== 'undefined') {
-            achievementSystem.checkAchievements();
-        }
-    }, 1000);
 
     function calculateTaskDuration(task, i){
         let start = parseInt(task.start_time);
@@ -510,7 +498,7 @@ document.addEventListener('DOMContentLoaded', function() {
             console.log(`Converted End Time (ET): ${endTimeET}`);
         }
 
-        const checkmark = document.getElementById('checkmark');
+        const checkmark = document.getElementById('checkmark'); 
         checkmark.setAttribute('data-task_id', date.id);
         checkmark.addEventListener('click', function(event) {
             let comp_points = localStorage.getItem("comp_points") ? parseInt(localStorage.getItem("comp_points")) : 0;
@@ -528,14 +516,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 $("#streaks").text(streaks + 1);
             }
 
-
+            
             $("#comp_points").text(comp_points + 10);
-
-            // Check for achievements after updating stats
-            if (typeof achievementSystem !== 'undefined') {
-                achievementSystem.checkAchievements();
-            }
-
             removeTask(event);
             const modal = document.getElementById("myModal");
             if (modal) {
@@ -552,34 +534,34 @@ document.addEventListener('DOMContentLoaded', function() {
                 console.error('dummyAccordion element not found');
                 return;
             }
-
+    
             // Clone the dummy accordion and update its content
             const autoCompleteDiv = dummyAutoCompleteDiv.cloneNode(true);
             autoCompleteDiv.classList.remove('d-none'); // Ensure it's visible
             autoCompleteDiv.id = `autoComplete${i}`; // Assign a unique ID
             autoCompleteContainer.appendChild(autoCompleteDiv);
-
+    
             // Update the accordion header and content
             const label = autoCompleteDiv.querySelector('div.accordion-item h2.accordion-header button');
             label.innerText = date.label;
             label.dataset.bsTarget = `#autoCompleteCollapse${i}`; // Update the target for collapse
             label.setAttribute('aria-controls', `autoCompleteCollapse${i}`);
-
+    
             const collapse = autoCompleteDiv.querySelector('div.accordion-item div.accordion-collapse');
             collapse.id = `autoCompleteCollapse${i}`; // Assign a unique ID for the collapse
             collapse.setAttribute('aria-labelledby', `autoComplete${i}`);
-
+    
             const dateLabel = autoCompleteDiv.querySelector('div.accordion-item .accordion-body .date-label');
-
+    
             // Convert UTC timestamps to local time for display
             const startTimeLocal = new Date(date.start_time * 1000).toLocaleString();
             const endTimeLocal = new Date(date.end_time * 1000).toLocaleString();
-
+    
             dateLabel.innerText = `${startTimeLocal} ~ ${endTimeLocal}`;
-
+    
             const dateUrgency = autoCompleteDiv.querySelector('div.accordion-item .accordion-body .date-urgency');
             dateUrgency.innerText = date.urgency;
-
+    
             // Add event listener for the save button inside the accordion
             const autoCompleteButton = autoCompleteDiv.querySelector('div.accordion-item .accordion-body button.autoCompleteButton');
             autoCompleteButton.onclick = function () {
@@ -588,18 +570,18 @@ document.addEventListener('DOMContentLoaded', function() {
                 document.getElementById('end_time').value = convertToDatetimeLocal(date.end_time);
                 document.getElementById('label-input').value = date.label;
                 document.getElementById('urgency').value = date.urgency;
-
+            
                 // Save the updated task when the save button is clicked
                 document.getElementById('saveButton').onclick = function () {
                     const updatedLabel = document.getElementById('label-input').value;
                     const updatedStartTime = convertToUTC(document.getElementById('start_time').value);
                     const updatedEndTime = convertToUTC(document.getElementById('end_time').value);
-
+            
                     // Update the task's data attributes
                     taskDiv.setAttribute('data-label', updatedLabel);
                     taskDiv.setAttribute('data-start_time', updatedStartTime);
                     taskDiv.setAttribute('data-end_time', updatedEndTime);
-
+            
                     // Update the task on the server
                     $.post('/update_task', {
                         id: date.id,
@@ -687,8 +669,8 @@ document.addEventListener('DOMContentLoaded', function() {
         console.log(`Comparing Day Start: ${dayStart}, Day End: ${dayEnd}, Start: ${event_start}, End: ${event_end}`);
 
         // Check if the event overlaps with the day
-        return (event_start >= dayStart && event_start <= dayEnd) ||
-            (event_end >= dayStart && event_end <= dayEnd) ||
+        return (event_start >= dayStart && event_start <= dayEnd) || 
+            (event_end >= dayStart && event_end <= dayEnd) || 
             (event_start <= dayStart && event_end >= dayEnd);
     }
 
@@ -729,19 +711,19 @@ document.addEventListener('DOMContentLoaded', function() {
         const dayElement = event.target.classList.contains("day")
             ? event.target
             : event.target.closest(".day");
-
+    
         if (dayElement) {
             const selectedDate = parseInt(dayElement.dataset.date); // Get the timestamp from the clicked day
             const currentSunday = getSundayStartOfWeek(); // Get the current week's Sunday
             const daysDifference = (selectedDate - currentSunday) / (24 * 60 * 60); // Difference in days
             const calculatedWeekOffset = Math.floor(daysDifference / 7); // Convert to week offset
-
+    
             console.log("Selected Date:", selectedDate);
             console.log("Calculated Week Offset:", calculatedWeekOffset);
-
+    
             // Store the calculated week offset in localStorage
             localStorage.setItem("weekOffset", calculatedWeekOffset);
-
+    
             // Redirect to the home page without the date query parameter
         }
     });

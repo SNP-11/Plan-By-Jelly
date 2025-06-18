@@ -34,23 +34,22 @@ def create_db():
                  CREATE TABLE users (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     username TEXT NOT NULL UNIQUE,
-                    password TEXT NOT NULL,
-                    tutorial_completed INTEGER DEFAULT 0
+                    password TEXT NOT NULL
                  );\
                  ''')
     conn.execute('''\
                  CREATE TABLE tasks (
-                    id INTEGER NOT NULL,
-                    uid INTEGER NOT NULL,
-                    label VARCHAR(80) NOT NULL,
-                    start_time INTEGER NOT NULL,
+                    id INTEGER NOT NULL, 
+                    uid INTEGER NOT NULL, 
+                    label VARCHAR(80) NOT NULL, 
+                    start_time INTEGER NOT NULL, 
                     end_time INTEGER,
                     urgency VARCHAR(30) NOT NULL,
                     save_task INTEGER NOT NULL,
                     PRIMARY KEY (id)
                  );\
                  ''')
-
+    
 
     # 1) git managment
     # 2) use alter
@@ -89,7 +88,7 @@ def login():
             session['uid'] = id
             flash('Login successful!', 'success')
             return redirect(url_for('home'))
-
+    
     # Flash this for any failure (username not found or password mismatch)
     flash('Your username or password was incorrect.', 'danger')
     return redirect(url_for('index'))
@@ -125,7 +124,7 @@ def view_users():
         cursor = conn.cursor()
         cursor.execute('SELECT * FROM users')
         user = cursor.fetchone()
-        #return jsonify(user)
+        #return jsonify(user)  
         return session["uid"]
 
 @app.route('/home')
@@ -141,7 +140,7 @@ def sunday():
 @app.route('/add_task', methods=['POST'])
 def add_task():
     task_controller = TaskController()
-
+    
     # Retrieve form data
     label = request.form.get('label')
     start_time = request.form.get('start_time')
@@ -152,10 +151,10 @@ def add_task():
 
     # Add the task and get the task data
     task_data = task_controller.add_task(uid, label, start_time, end_time, urgency, save_task)
-
+    
     # Prepare the response
     response = task_data
-
+    
     # Return the response as JSON
     return response
 
@@ -176,7 +175,7 @@ def fetch_task_text():
 @app.route('/get_task', methods= ['POST'])
 def get_task():
     task_controller = TaskController()
-
+    
     # Retrieve form data
     id = request.form.get('id')
     task_data = task_controller.get_task_by_id(1, id)
@@ -186,14 +185,14 @@ def get_task():
 @app.route('/get_tasks', methods=['POST'])
 def get_tasks():
     task_controller = TaskController()
-
+    
     # Retrieve tasks by user id
     uid = session["uid"]
     task_data = task_controller.get_tasks_by_uid(uid)
-
+    
     # Print task data to identify any issues
     print(f"Task Data: {task_data}")
-
+    
     try:
         return jsonify(task_data)  # This will throw an error if something is not serializable
     except TypeError as e:
@@ -224,28 +223,22 @@ def calendar():
 @app.route('/timeout')
 def timeout():
     return render_template('timeout.html')
-#0. Make a controller
-#1. Create a route in this file that accepts data as a POST from new task form
-#2. Handle Posted Data using alchemy to put the data into the database
+#0. Make a controller 
+#1. Create a route in this file that accepts data as a POST from new task form 
+#2. Handle Posted Data using alchemy to put the data into the database 
 #3. Resolve the comment by using SELECT in alchemy
 
 @app.route('/reward')
 def reward():
     return render_template('rewardPage.html')
 
-@app.route('/tutorial_completed', methods=['POST'])
-def tutorial_completed():
-    if 'username' not in session:
-        return jsonify({'error': 'Not logged in'}), 401
-
-    # Optional: You could store tutorial completion in database here
-    # For now, we're using localStorage on the frontend
-    return jsonify({'status': 'success'})
-
 @app.route('/signout')
 def signout():
         session.clear()  # Clear all session data
         return redirect(url_for('index'))
+@app.route('/donut')
+def donut():
+    return render_template('donut.html')
 
 if __name__ == '__main__':
     app.run(debug=True)

@@ -139,6 +139,7 @@
       <a href="/home">HOME</a>
       <a href="/calendar">CALENDAR</a>
       <a href="/timeout">TIMEOUT</a>
+      <a href="#">SETTINGS</a>
       <a href="/signout">LOG OUT</a>
     </div>
 
@@ -184,7 +185,7 @@
           <strong>Goal Getter</strong>
           <div class="progress-bar"><div class="progress" id="goal-getter-progress"></div></div>
           <span id="goal-getter-display">Complete 100 tasks</span>
-        </div>
+        </div>  
       </div>
   </div>
 
@@ -197,7 +198,7 @@
     // XP Logic
     let xp = localStorage.getItem("comp_points") ? parseInt(localStorage.getItem("comp_points")) : 0;
     document.getElementById('xp-display').textContent = xp + ' XP';
-
+    
     let sageLevel = "Beginner";
     let sagePercent = 0;
     if (xp>=1000){
@@ -215,29 +216,9 @@
     } else {
       sagePercent = (xp / 50) * 100;
     }
-
-    // Streak Level Logic
-    let streaks = localStorage.getItem("streaks") ? parseInt(localStorage.getItem("streaks")) : 0;
-    let streakLevel = "Beginner";
-    let streakTitle = "Streak Star";
-
-    if (streaks >= 30) {
-      streakLevel = "Monthly Master";
-      streakTitle = "Monthly Master";
-    } else if (streaks >= 14) {
-      streakLevel = "Fortnight Fighter";
-      streakTitle = "Fortnight Fighter";
-    } else if (streaks >= 7) {
-      streakLevel = "Week Warrior";
-      streakTitle = "Week Warrior";
-    } else if (streaks >= 3) {
-      streakLevel = "Streak Starter";
-      streakTitle = "Streak Starter";
-    }
-
-    let streakImage = "";
-    switch (streakLevel) {
-      case "Monthly Master":
+    let streakImage ="";
+    switch (streakImage){
+      case"Monthly Master":
         streakImage = "{{ url_for('static', filename='badge_streak_Master.png') }}";
         break;
       case "Fortnight Fighter":
@@ -276,58 +257,11 @@
     document.getElementById("sage-title").textContent = sageLevel;
     document.getElementById("sage-progress").style.width = `${sagePercent}%`;
 
-    // Calculate streak progress based on current level
-    let streakPercent = 0;
-    if (streaks >= 30) {
-      streakPercent = 100; // Monthly Master achieved
-    } else if (streaks >= 14) {
-      streakPercent = ((streaks - 14) / (30 - 14)) * 100; // Progress toward Monthly Master
-    } else if (streaks >= 7) {
-      streakPercent = ((streaks - 7) / (14 - 7)) * 100; // Progress toward Fortnight Fighter
-    } else if (streaks >= 3) {
-      streakPercent = ((streaks - 3) / (7 - 3)) * 100; // Progress toward Week Warrior
-    } else {
-      streakPercent = (streaks / 3) * 100; // Progress toward Streak Starter
-    }
-
-    // Determine next milestone for display
-    let nextMilestone = "";
-    let daysToNext = 0;
-    if (streaks < 3) {
-      nextMilestone = "Streak Starter";
-      daysToNext = 3 - streaks;
-    } else if (streaks < 7) {
-      nextMilestone = "Week Warrior";
-      daysToNext = 7 - streaks;
-    } else if (streaks < 14) {
-      nextMilestone = "Fortnight Fighter";
-      daysToNext = 14 - streaks;
-    } else if (streaks < 30) {
-      nextMilestone = "Monthly Master";
-      daysToNext = 30 - streaks;
-    }
-
-    // Apply streak image and title
-    document.querySelector("#streak-badge img").src = streakImage;
-    document.querySelector("#streak-badge strong").textContent = streakTitle;
-
-    // Update display text based on achievement status
-    if (streaks >= 30) {
-      document.getElementById('streak-display').textContent = `${streaks} Days - MAX LEVEL!`;
-    } else if (daysToNext > 0) {
-      document.getElementById('streak-display').textContent = `${streaks} Days`;
-    } else {
-      document.getElementById('streak-display').textContent = `${streaks} Days`;
-    }
-
-    document.getElementById("streak-progress").style.width = `${Math.min(streakPercent, 100)}%`;
-
-    // Add gold border for completed streak achievements
-    if (streaks >= 30) {
-      document.getElementById("streak-badge").style.border = "2px solid gold";
-    } else if (streaks >= 3) {
-      document.getElementById("streak-badge").style.border = "2px solid silver";
-    }
+    // Streaks
+    let streaks = localStorage.getItem("streaks") ? parseInt(localStorage.getItem("streaks")) : 0;
+    document.getElementById('streak-display').textContent = streaks + ' Days';
+    let streakPercent = Math.min((streaks / 30) * 100, 100);
+    document.getElementById("streak-progress").style.width = `${streakPercent}%`;
 
     let tasksCompleted = localStorage.getItem("completed_tasks") ? parseInt(localStorage.getItem("completed_tasks")) : 0;
     let tamerProgress = Math.min((tasksCompleted / 10) * 100, 100);
