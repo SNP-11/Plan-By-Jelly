@@ -50,6 +50,10 @@
                 <span class="material-icons">🔥</span> Streak: <span id="streaks"></span>
                 &nbsp;&nbsp; <!-- Add two non-breaking spaces -->
                 <span class = "material-icons">🌟</span>Points:<span id = "comp_points"></span>
+                &nbsp;&nbsp;
+                <button id="ai-insights-btn" class="btn btn-sm btn-outline-info" style="font-size: 12px;">
+                    🤖 AI Insights
+                </button>
              </div>
             <div class="week-navigation">
                 <span id="prevWeek" class="material-icons"><mark>chevron_left</mark></span>
@@ -92,9 +96,16 @@
                                <div class="wrapper sunday-modal-content">
                                     <div class="input-container">
                                         <div class="input-group">
-                                            <div class="star-checkbox-container">
-                                                <input type="checkbox" id="save_task" class="star-checkbox">
-                                                <label for="save_task" class="star-label material-icons">star</label>
+                                            <div style="display: flex; align-items: center; justify-content: center; position: relative; width: 100%;">
+                                                <!-- Star positioned absolutely to the left -->
+                                                <div class="star-checkbox-container" style="position: absolute; left: 0;">
+                                                    <input type="checkbox" id="save_task" class="star-checkbox">
+                                                    <label for="save_task" class="star-label material-icons">star</label>
+                                                </div>
+                                                <!-- AI Suggestion Button - Centered -->
+                                                <button type="button" id="ai-suggest-btn" class="btn btn-outline-light" style="font-size: 14px; padding: 8px 16px; border-radius: 6px; background: rgba(245,245,245,0.1); border: 1px solid rgba(245,245,245,0.3); color: #f5f5f5; transition: all 0.2s;">
+                                                    🤖 Get AI Time Suggestion
+                                                </button>
                                             </div>
                                             <!-- Completion Button in Top Left -->
                                             <div class="completion" id="checkmark" style="margin-bottom: 20px;">
@@ -226,19 +237,22 @@
         </div>
     </div>
         
+        <script src="{{ url_for('static', filename='js/ai-integration.js') }}"></script>
         <script src="{{ url_for('static', filename='js/home.js') }}"></script>
         <script src="{{ url_for('static', filename='js/actionable.js') }}"></script>
         <script>
             flatpickr("#start_time", {
                 enableTime: true,
-                dateFormat: "Y-m-d H:i",
-                theme: "dark"
+                dateFormat: "n/j--H:i K",  // Format: 8/21--12:45 PM
+                theme: "dark",
+                time_24hr: false  // Use 12-hour format with AM/PM
             });
 
             flatpickr("#end_time", {
                 enableTime: true,
-                dateFormat: "Y-m-d H:i",
-                theme: "dark"
+                dateFormat: "n/j--H:i K",  // Format: 8/21--12:45 PM
+                theme: "dark",
+                time_24hr: false  // Use 12-hour format with AM/PM
             });
         </script>
 

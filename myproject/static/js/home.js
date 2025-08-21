@@ -12,8 +12,42 @@ document.addEventListener('DOMContentLoaded', function() {
 
     $("#comp_points").text(comp_points);
     $("#streaks").text(streaks);
-    
-  
+
+    // Check for pending completion notification
+    checkForCompletionNotification();
+
+    // AI Integration Setup
+    setupAIIntegration();
+
+    // Check for pending completion notification after page reload
+    function checkForCompletionNotification() {
+        const pendingNotification = localStorage.getItem('pending_completion_notification');
+        if (pendingNotification) {
+            try {
+                const completionData = JSON.parse(pendingNotification);
+
+                // Check if notification is recent (within last 10 seconds to avoid stale notifications)
+                const timeDiff = Date.now() - completionData.timestamp;
+                if (timeDiff < 10000) {
+                    // Show the completion notification
+                    setTimeout(() => {
+                        showTaskCompletionNotification(
+                            completionData.taskName,
+                            completionData.earnedXP,
+                            completionData.suggestion
+                        );
+                    }, 500); // Small delay to ensure page is fully loaded
+                }
+
+                // Remove the pending notification
+                localStorage.removeItem('pending_completion_notification');
+            } catch (error) {
+                console.error('Error parsing completion notification:', error);
+                localStorage.removeItem('pending_completion_notification');
+            }
+        }
+    }
+
     function getSundayStartOfWeek() {
         const now = new Date();
         const dayOfWeek = now.getDay(); // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
@@ -305,6 +339,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     document.getElementById("addButton").addEventListener('click', (event) => addTask(event));
     document.getElementById("removeButton").addEventListener('click', (event) => removeTask(event));
+    // Note: completeTask is called from the checkmark click handler in the modal
 
 
     function addTask(event) {
@@ -337,24 +372,24 @@ document.addEventListener('DOMContentLoaded', function() {
     function removeTask(event) {
         const taskId = event.currentTarget.dataset.task_id; // Use currentTarget instead of srcElement
         console.log("Removing task with ID:", taskId);
-    
+
         if (!taskId) {
             console.error("Task ID is missing. Cannot delete task.");
             return;
         }
-    
+
         // Remove the task from the savedTasks array
         const taskIndex = savedTasks.findIndex(task => task.id === `autoComplete${taskId}`);
         if (taskIndex !== -1) {
             savedTasks.splice(taskIndex, 1); // Remove the task from the array
         }
-    
+
         // Remove the task element from the DOM
         const taskElement = document.getElementById(`autoComplete${taskId}`);
         if (taskElement) {
             taskElement.remove();
         }
-    
+
         // Send a request to the server to delete the task
         $.post('/delete_task', { id: taskId }, function (response) {
             console.log("Task removed:", response);
@@ -362,7 +397,512 @@ document.addEventListener('DOMContentLoaded', function() {
             window.location.reload(); // Reload the page to reflect changes
         });
     }
-    
+
+    function completeTask(taskId) {
+        console.log("Completing task with ID:", taskId);
+
+        if (!taskId) {
+            console.error("Task ID is missing. Cannot complete task.");
+            return;
+        }
+
+        // Find the task data for time analysis
+        const currentTask = savedTasks.find(task => task.id === `autoComplete${taskId}`) ||
+                           tasks.find(task => task.id == taskId);
+
+        if (!currentTask) {
+            console.error("Task not found for completion analysis:", taskId);
+            return;
+        }
+
+        // Calculate time metrics
+        const currentTime = Math.floor(Date.now() / 1000);
+        const estimatedDuration = currentTask.end_time - currentTask.start_time; // in seconds
+        const actualDuration = currentTime - currentTask.start_time; // in seconds
+        const estimatedMinutes = Math.round(estimatedDuration / 60);
+        const actualMinutes = Math.round(actualDuration / 60);
+        const actualHours = Math.floor(actualMinutes / 60);
+        const remainingMinutes = actualMinutes % 60;
+
+        // Calculate XP based on task difficulty and performance
+        const baseXP = Math.max(5, Math.min(estimatedMinutes, 50)); // 5-50 XP based on estimated time
+        const timeRatio = actualDuration / estimatedDuration;
+        let xpMultiplier = 1.0;
+
+        if (timeRatio <= 0.8) {
+            xpMultiplier = 1.2; // Bonus for efficiency
+        } else if (timeRatio <= 1.2) {
+            xpMultiplier = 1.0; // Normal XP
+        } else {
+            xpMultiplier = 0.8; // Reduced XP for taking too long
+        }
+
+        const earnedXP = Math.round(baseXP * xpMultiplier);
+
+        // Generate time analysis suggestion
+        let suggestion = "";
+        if (timeRatio < 0.5) {
+            suggestion = "You may have completed this task too fast. Make sure you did your best work!";
+        } else if (timeRatio < 0.8) {
+            suggestion = "Great time management! You finished efficiently.";
+        } else if (timeRatio <= 1.2) {
+            suggestion = "Perfect timing! You completed this task as expected.";
+        } else if (timeRatio <= 2.0) {
+            const timeText = actualHours > 0 ? `${actualHours}h ${remainingMinutes}m` : `${actualMinutes}m`;
+            suggestion = `This task took you ${timeText}. Consider breaking larger tasks into smaller parts next time.`;
+        } else {
+            const timeText = actualHours > 0 ? `${actualHours}h ${remainingMinutes}m` : `${actualMinutes}m`;
+            suggestion = `This task took you ${timeText}. You might want to plan more time for similar tasks in the future.`;
+        }
+
+        // Store time tracking data for AI learning
+        storeTimeTrackingData(currentTask, estimatedDuration, actualDuration, earnedXP);
+
+        // Show completion notification
+        showTaskCompletionNotification(currentTask.label, earnedXP, suggestion);
+
+        // Remove the task from the savedTasks array
+        const taskIndex = savedTasks.findIndex(task => task.id === `autoComplete${taskId}`);
+        if (taskIndex !== -1) {
+            savedTasks.splice(taskIndex, 1);
+        }
+
+        // Remove the task element from the DOM
+        const taskElement = document.getElementById(`autoComplete${taskId}`);
+        if (taskElement) {
+            taskElement.remove();
+        }
+
+        // Remove any task divs in the schedule
+        const taskDivs = document.querySelectorAll('.task-div');
+        taskDivs.forEach(div => {
+            if (div.getAttribute('data-id') == taskId) {
+                div.remove();
+            }
+        });
+
+        // Update points and streaks with earned XP
+        let comp_points = localStorage.getItem("comp_points") ? parseInt(localStorage.getItem("comp_points")) : 0;
+        let streaks = localStorage.getItem("streaks") ? parseInt(localStorage.getItem("streaks")) : 0;
+        let tasksCompleted = localStorage.getItem("completed_tasks") ? parseInt(localStorage.getItem("completed_tasks")) : 0;
+        let last_streak = localStorage.getItem("last_streak") ? localStorage.getItem("last_streak") : 0;
+        let last_streak_time = parseInt(last_streak);
+
+        localStorage.setItem("comp_points", comp_points + earnedXP);
+        localStorage.setItem("completed_tasks", tasksCompleted + 1);
+        $("#comp_points").text(comp_points + earnedXP);
+
+        if (last_streak_time < (currentTime - 86400)) {
+            localStorage.setItem("streaks", streaks + 1);
+            localStorage.setItem("last_streak", currentTime);
+            $("#streaks").text(streaks + 1);
+        }
+
+        // Send completion data to server
+        $.post('/complete_task', {
+            id: taskId,
+            actual_duration: actualDuration,
+            estimated_duration: estimatedDuration,
+            earned_xp: earnedXP
+        }, function (response) {
+            console.log("Task completed:", response);
+
+            // Delay reload to show notification for 5 seconds
+            setTimeout(() => {
+                window.location.reload();
+            }, 5000);
+        });
+    }
+
+    // Remove task from UI immediately (Step 2 of completion flow)
+    function removeTaskFromUI(taskId) {
+        console.log("Removing task from UI:", taskId);
+
+        // Remove from savedTasks array
+        const taskIndex = savedTasks.findIndex(task => task.id === `autoComplete${taskId}`);
+        if (taskIndex !== -1) {
+            savedTasks.splice(taskIndex, 1);
+        }
+
+        // Remove the task element from the DOM
+        const taskElement = document.getElementById(`autoComplete${taskId}`);
+        if (taskElement) {
+            taskElement.remove();
+        }
+
+        // Remove any task divs in the schedule
+        const taskDivs = document.querySelectorAll('.task-div');
+        taskDivs.forEach(div => {
+            if (div.getAttribute('data-id') == taskId) {
+                div.remove();
+            }
+        });
+    }
+
+    // Complete task with notification (Step 3 of completion flow)
+    function completeTaskWithNotification(taskId) {
+        console.log("Processing completion for task:", taskId);
+
+        // Find the task data for time analysis
+        const currentTask = savedTasks.find(task => task.id === `autoComplete${taskId}`) ||
+                           tasks.find(task => task.id == taskId);
+
+        if (!currentTask) {
+            console.error("Task not found for completion analysis:", taskId);
+            // Still proceed with basic completion
+            basicTaskCompletion(taskId);
+            return;
+        }
+
+        // Calculate time metrics and show notification
+        const currentTime = Math.floor(Date.now() / 1000);
+        const estimatedDuration = currentTask.end_time - currentTask.start_time;
+        const actualDuration = currentTime - currentTask.start_time;
+        const estimatedMinutes = Math.round(estimatedDuration / 60);
+        const actualMinutes = Math.round(actualDuration / 60);
+        const actualHours = Math.floor(actualMinutes / 60);
+        const remainingMinutes = actualMinutes % 60;
+
+        // Calculate XP
+        const baseXP = Math.max(5, Math.min(estimatedMinutes, 50));
+        const timeRatio = actualDuration / estimatedDuration;
+        let xpMultiplier = 1.0;
+
+        if (timeRatio <= 0.8) {
+            xpMultiplier = 1.2;
+        } else if (timeRatio <= 1.2) {
+            xpMultiplier = 1.0;
+        } else {
+            xpMultiplier = 0.8;
+        }
+
+        const earnedXP = Math.round(baseXP * xpMultiplier);
+
+        // Generate suggestion
+        let suggestion = "";
+        if (timeRatio < 0.5) {
+            suggestion = "You may have completed this task too fast. Make sure you did your best work!";
+        } else if (timeRatio < 0.8) {
+            suggestion = "Great time management! You finished efficiently.";
+        } else if (timeRatio <= 1.2) {
+            suggestion = "Perfect timing! You completed this task as expected.";
+        } else if (timeRatio <= 2.0) {
+            const timeText = actualHours > 0 ? `${actualHours}h ${remainingMinutes}m` : `${actualMinutes}m`;
+            suggestion = `This task took you ${timeText}. Consider breaking larger tasks into smaller parts next time.`;
+        } else {
+            const timeText = actualHours > 0 ? `${actualHours}h ${remainingMinutes}m` : `${actualMinutes}m`;
+            suggestion = `This task took you ${timeText}. You might want to plan more time for similar tasks in the future.`;
+        }
+
+        // Store time tracking data
+        storeTimeTrackingData(currentTask, estimatedDuration, actualDuration, earnedXP);
+
+        // Show notification immediately after task removal
+        showTaskCompletionNotification(currentTask.label, earnedXP, suggestion);
+
+        // Update points and streaks
+        updatePointsAndStreaks(earnedXP);
+
+        // Send to server
+        $.post('/complete_task', {
+            id: taskId,
+            actual_duration: actualDuration,
+            estimated_duration: estimatedDuration,
+            earned_xp: earnedXP
+        }, function (response) {
+            console.log("Task completed:", response);
+
+            // Reload page after 5 seconds (after notification finishes)
+            setTimeout(() => {
+                window.location.reload();
+            }, 5000);
+        });
+    }
+
+    // Basic task completion fallback
+    function basicTaskCompletion(taskId) {
+        updatePointsAndStreaks(10); // Default 10 XP
+
+        $.post('/complete_task', { id: taskId }, function (response) {
+            console.log("Task completed (basic):", response);
+
+            // Reload page after 5 seconds
+            setTimeout(() => {
+                window.location.reload();
+            }, 5000);
+        });
+    }
+
+    // Update points and streaks helper
+    function updatePointsAndStreaks(earnedXP) {
+        const currentTime = Math.floor(Date.now() / 1000);
+        let comp_points = localStorage.getItem("comp_points") ? parseInt(localStorage.getItem("comp_points")) : 0;
+        let streaks = localStorage.getItem("streaks") ? parseInt(localStorage.getItem("streaks")) : 0;
+        let tasksCompleted = localStorage.getItem("completed_tasks") ? parseInt(localStorage.getItem("completed_tasks")) : 0;
+        let last_streak = localStorage.getItem("last_streak") ? localStorage.getItem("last_streak") : 0;
+        let last_streak_time = parseInt(last_streak);
+
+        localStorage.setItem("comp_points", comp_points + earnedXP);
+        localStorage.setItem("completed_tasks", tasksCompleted + 1);
+        $("#comp_points").text(comp_points + earnedXP);
+
+        if (last_streak_time < (currentTime - 86400)) {
+            localStorage.setItem("streaks", streaks + 1);
+            localStorage.setItem("last_streak", currentTime);
+            $("#streaks").text(streaks + 1);
+        }
+    }
+
+    // Complete task immediately and reload (new flow)
+    function completeTaskImmediately(taskId) {
+        console.log("Completing task immediately:", taskId);
+
+        // Find the task data for completion analysis
+        const currentTask = savedTasks.find(task => task.id === `autoComplete${taskId}`) ||
+                           tasks.find(task => task.id == taskId);
+
+        if (currentTask) {
+            // Calculate completion data
+            const currentTime = Math.floor(Date.now() / 1000);
+            const estimatedDuration = currentTask.end_time - currentTask.start_time;
+            const actualDuration = currentTime - currentTask.start_time;
+            const estimatedMinutes = Math.round(estimatedDuration / 60);
+            const actualMinutes = Math.round(actualDuration / 60);
+            const actualHours = Math.floor(actualMinutes / 60);
+            const remainingMinutes = actualMinutes % 60;
+
+            // Calculate XP (max 15 XP)
+            const baseXP = Math.max(3, Math.min(estimatedMinutes / 4, 15)); // Scale down base XP
+            const timeRatio = actualDuration / estimatedDuration;
+            let xpMultiplier = 1.0;
+
+            if (timeRatio <= 0.5) {
+                // Completed way too fast - might have rushed
+                xpMultiplier = 0.2; // Very low XP (1-3 XP)
+            } else if (timeRatio <= 0.8) {
+                // Efficient completion
+                xpMultiplier = 1.0;
+            } else if (timeRatio <= 1.2) {
+                // Normal completion
+                xpMultiplier = 0.9;
+            } else {
+                // Took longer than expected
+                xpMultiplier = 0.7;
+            }
+
+            const earnedXP = Math.max(1, Math.min(Math.round(baseXP * xpMultiplier), 15));
+
+            // Generate suggestion
+            let suggestion = "";
+            if (timeRatio < 0.5) {
+                suggestion = "You may have completed this task too fast. Make sure you did your best work!";
+            } else if (timeRatio < 0.8) {
+                suggestion = "Great time management! You finished efficiently.";
+            } else if (timeRatio <= 1.2) {
+                suggestion = "Perfect timing! You completed this task as expected.";
+            } else if (timeRatio <= 2.0) {
+                const timeText = actualHours > 0 ? `${actualHours}h ${remainingMinutes}m` : `${actualMinutes}m`;
+                suggestion = `This task took you ${timeText}. Consider breaking larger tasks into smaller parts next time.`;
+            } else {
+                const timeText = actualHours > 0 ? `${actualHours}h ${remainingMinutes}m` : `${actualMinutes}m`;
+                suggestion = `This task took you ${timeText}. You might want to plan more time for similar tasks in the future.`;
+            }
+
+            // Store completion data in localStorage to show after reload
+            const completionData = {
+                taskName: currentTask.label,
+                earnedXP: earnedXP,
+                suggestion: suggestion,
+                timestamp: Date.now()
+            };
+            localStorage.setItem('pending_completion_notification', JSON.stringify(completionData));
+
+            // Store time tracking data
+            storeTimeTrackingData(currentTask, estimatedDuration, actualDuration, earnedXP);
+
+            // Update points and streaks immediately
+            updatePointsAndStreaks(earnedXP);
+
+            // Send to server (don't wait for response)
+            $.post('/complete_task', {
+                id: taskId,
+                actual_duration: actualDuration,
+                estimated_duration: estimatedDuration,
+                earned_xp: earnedXP
+            });
+        } else {
+            // Fallback for missing task data
+            const completionData = {
+                taskName: "Task",
+                earnedXP: 10,
+                suggestion: "Great job completing your task!",
+                timestamp: Date.now()
+            };
+            localStorage.setItem('pending_completion_notification', JSON.stringify(completionData));
+            updatePointsAndStreaks(10);
+            $.post('/complete_task', { id: taskId });
+        }
+
+        // Remove task from UI
+        removeTaskFromUI(taskId);
+
+        // Reload immediately
+        window.location.reload();
+    }
+
+    // Store time tracking data for AI learning
+    function storeTimeTrackingData(task, estimatedDuration, actualDuration, earnedXP) {
+        const timeTrackingData = {
+            taskLabel: task.label,
+            subject: categorizeTaskAdvanced(task.label),
+            estimatedDuration: estimatedDuration,
+            actualDuration: actualDuration,
+            timeRatio: actualDuration / estimatedDuration,
+            earnedXP: earnedXP,
+            timestamp: Date.now(),
+            urgency: task.urgency || 'medium'
+        };
+
+        // Store in localStorage for AI learning
+        let trackingHistory = JSON.parse(localStorage.getItem("time_tracking_history") || "[]");
+        trackingHistory.push(timeTrackingData);
+
+        // Keep only last 100 entries to prevent storage bloat
+        if (trackingHistory.length > 100) {
+            trackingHistory = trackingHistory.slice(-100);
+        }
+
+        localStorage.setItem("time_tracking_history", JSON.stringify(trackingHistory));
+        console.log("Time tracking data stored:", timeTrackingData);
+    }
+
+    // Show task completion notification
+    function showTaskCompletionNotification(taskName, xp, suggestion) {
+        const notification = document.createElement('div');
+        notification.className = 'task-completion-notification';
+        notification.innerHTML = `
+            <div class="notification-content">
+                <div class="completion-header">
+                    <span class="task-name">"${taskName}"</span> task completed!
+                </div>
+                <div class="xp-earned">+${xp} XP</div>
+                <div class="suggestion">${suggestion}</div>
+            </div>
+        `;
+
+        notification.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+            color: white;
+            padding: 16px 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(76, 175, 80, 0.3);
+            z-index: 2000;
+            max-width: 350px;
+            font-family: Arial, sans-serif;
+            animation: slideInRight 0.5s ease-out;
+        `;
+
+        document.body.appendChild(notification);
+
+        // Auto-remove after 5 seconds
+        setTimeout(() => {
+            notification.style.animation = 'slideOutRight 0.5s ease-in';
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.remove();
+                }
+            }, 500);
+        }, 5000);
+    }
+
+    // Advanced task categorization function
+    function categorizeTaskAdvanced(taskDescription) {
+        if (!taskDescription) return 'general';
+
+        const taskLower = taskDescription.toLowerCase();
+
+        // Expanded categorization with comprehensive subjects
+        const categories = {
+            // Core Academic - Math
+            'math': ['math', 'algebra', 'geometry', 'calculus', 'statistics', 'arithmetic', 'trigonometry', 'precalculus'],
+
+            // Core Academic - Science
+            'biology': ['biology', 'bio', 'life science', 'anatomy', 'genetics', 'ecology'],
+            'chemistry': ['chemistry', 'chem', 'chemical', 'molecules', 'reactions', 'periodic table'],
+            'physics': ['physics', 'mechanics', 'thermodynamics', 'electricity', 'magnetism', 'waves'],
+            'science': ['science', 'earth science', 'environmental science', 'scientific method'],
+
+            // Core Academic - Language Arts
+            'english': ['english', 'language arts', 'literature', 'grammar', 'vocabulary', 'spelling'],
+            'writing': ['writing', 'essay', 'composition', 'creative writing', 'journal', 'story'],
+            'reading': ['reading', 'novel', 'book', 'comprehension', 'analysis'],
+
+            // Core Academic - Social Studies
+            'history': ['history', 'world history', 'american history', 'civil war', 'revolution'],
+            'social_studies': ['social studies', 'government', 'civics', 'politics', 'democracy'],
+            'geography': ['geography', 'maps', 'countries', 'capitals', 'continents'],
+            'economics': ['economics', 'personal finance', 'money', 'budget', 'investment'],
+
+            // Core Academic - Other
+            'computer_science': ['computer science', 'coding', 'programming', 'python', 'java', 'html', 'css', 'javascript'],
+            'foreign_language': ['spanish', 'french', 'latin', 'mandarin', 'chinese', 'german', 'italian', 'language'],
+            'health': ['health', 'nutrition', 'wellness', 'safety', 'first aid'],
+
+            // Arts & Creative
+            'art': ['art', 'drawing', 'painting', 'sculpture', 'digital art', 'sketch', 'design'],
+            'music': ['music', 'band', 'orchestra', 'choir', 'piano', 'guitar', 'violin', 'drums', 'music theory'],
+            'theater': ['theater', 'drama', 'acting', 'play', 'performance', 'script'],
+
+            // Physical & Sports
+            'physical_education': ['pe', 'gym', 'physical education', 'fitness', 'exercise'],
+            'sports_practice': ['soccer practice', 'basketball practice', 'tennis practice', 'track practice',
+                              'swimming practice', 'baseball practice', 'football practice', 'practice'],
+            'sports_game': ['soccer game', 'basketball game', 'tennis match', 'swim meet', 'track meet',
+                          'baseball game', 'football game', 'game', 'match', 'meet', 'competition'],
+            'dance': ['dance', 'ballet', 'jazz dance', 'hip hop', 'choreography', 'cheerleading'],
+            'martial_arts': ['martial arts', 'karate', 'taekwondo', 'judo', 'kung fu', 'boxing'],
+
+            // Clubs & Activities
+            'debate': ['debate', 'model un', 'speech', 'public speaking', 'argumentation'],
+            'robotics': ['robotics', 'robot', 'engineering', 'stem', 'coding club'],
+            'student_government': ['student government', 'student council', 'leadership', 'class president'],
+            'volunteering': ['volunteering', 'community service', 'volunteer', 'service work', 'charity'],
+            'club_meeting': ['club meeting', 'chess club', 'coding club', 'cultural club', 'meeting'],
+
+            // Academic Tasks
+            'homework': ['homework', 'hw', 'assignment', 'worksheet', 'problem set'],
+            'studying': ['studying', 'study', 'review', 'memorize', 'flashcards', 'notes'],
+            'test_prep': ['test', 'quiz', 'exam', 'midterm', 'final', 'sat', 'act', 'standardized test'],
+            'project': ['project', 'group project', 'science project', 'research project'],
+            'essay_writing': ['essay', 'paper', 'research paper', 'report', 'thesis'],
+            'presentation': ['presentation', 'present', 'powerpoint', 'slides', 'speech'],
+            'lab_work': ['lab', 'laboratory', 'experiment', 'lab report'],
+            'extra_credit': ['extra credit', 'bonus', 'additional work'],
+
+            // Personal Development
+            'tutoring': ['tutoring', 'tutor', 'help session', 'study group'],
+            'college_prep': ['college application', 'scholarship', 'college prep', 'university'],
+            'internship': ['internship', 'job shadowing', 'work experience'],
+            'personal_growth': ['journaling', 'reflection', 'meditation', 'mindfulness'],
+
+            // General Tasks
+            'chores': ['chores', 'clean', 'organize', 'tidy', 'laundry', 'dishes'],
+            'general': ['task', 'work', 'activity', 'assignment']
+        };
+
+        // Find the most specific match
+        for (const [category, keywords] of Object.entries(categories)) {
+            if (keywords.some(keyword => taskLower.includes(keyword))) {
+                return category;
+            }
+        }
+
+        return 'general';
+    }
+
     // Function to toggle the sidebar menu
     function toggleMenu() {
         const sideMenu = document.getElementById("sideMenu");
@@ -501,28 +1041,20 @@ document.addEventListener('DOMContentLoaded', function() {
         const checkmark = document.getElementById('checkmark'); 
         checkmark.setAttribute('data-task_id', date.id);
         checkmark.addEventListener('click', function(event) {
-            let comp_points = localStorage.getItem("comp_points") ? parseInt(localStorage.getItem("comp_points")) : 0;
-            let streaks  = localStorage.getItem("streaks") ? parseInt(localStorage.getItem("streaks")) : 0;
-            let tasksCompleted = localStorage.getItem("completed_tasks") ? parseInt(localStorage.getItem("completed_tasks")) : 0;
-            localStorage.setItem("completed_tasks", tasksCompleted + 1);
-            let last_streak = localStorage.getItem("last_streak") ? localStorage.getItem("last_streak") : 0;
-            let current_time = Math.floor(Date.now() / 1000); // Current time in seconds
-            let last_streak_time = parseInt(last_streak);
-            localStorage.setItem("comp_points", comp_points + 10);
-            console.log(current_time);
-            if (last_streak_time < (current_time - 86400)){
-                localStorage.setItem("streaks", streaks + 1);
-                localStorage.setItem("last_streak", current_time);
-                $("#streaks").text(streaks + 1);
+            // Get the correct task ID from the modal's current task data
+            const modal = document.getElementById("myModal");
+            const taskId = modal.getAttribute('data-current-task-id');
+
+            if (!taskId) {
+                console.error("No task ID found in modal");
+                return;
             }
 
-            
-            $("#comp_points").text(comp_points + 10);
-            removeTask(event);
-            const modal = document.getElementById("myModal");
-            if (modal) {
-                modal.style.display = "none";
-            }
+            // Step 1: Close modal immediately
+            modal.style.display = "none";
+
+            // Step 2: Process completion and reload immediately
+            completeTaskImmediately(taskId);
         });
 
         // Check if the task should be saved
@@ -683,6 +1215,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
         selected_id = taskId;
 
+        // Store the task ID in the modal for the completion handler
+        const modal = document.getElementById("myModal");
+        modal.setAttribute('data-current-task-id', taskId);
+
         // Populate modal fields with task data
         document.getElementById('taskLabelInput').value = taskLabel;
         document.getElementById('taskStartTimeInput').value = convertToDatetimeLocal(parseInt(taskStartTime));
@@ -767,4 +1303,48 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     });
+
+    // AI Integration Functions
+    function setupAIIntegration() {
+        // Add event listener for AI suggestion button
+        const aiSuggestBtn = document.getElementById('ai-suggest-btn');
+        if (aiSuggestBtn) {
+            aiSuggestBtn.addEventListener('click', async function() {
+                const labelInput = document.getElementById('label-input');
+                const taskDescription = labelInput.value.trim();
+
+                if (!taskDescription) {
+                    alert('Please enter a task description first!');
+                    return;
+                }
+
+                // Show loading state
+                aiSuggestBtn.innerHTML = '🤖 Getting suggestion...';
+                aiSuggestBtn.disabled = true;
+
+                try {
+                    // Get AI suggestion
+                    const suggestion = await taskAI.getDurationSuggestion(taskDescription);
+
+                    if (suggestion) {
+                        // Show the suggestion in the UI
+                        taskAI.showDurationSuggestion(suggestion, labelInput);
+                    } else {
+                        alert('Sorry, could not get AI suggestion. Please set times manually.');
+                    }
+                } catch (error) {
+                    console.error('AI suggestion error:', error);
+                    alert('Error getting AI suggestion. Please try again.');
+                } finally {
+                    // Reset button state
+                    aiSuggestBtn.innerHTML = '🤖 Get AI Time Suggestion';
+                    aiSuggestBtn.disabled = false;
+                }
+            });
+        }
+    }
+
+
+
+
 });

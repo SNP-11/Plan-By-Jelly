@@ -87,6 +87,11 @@ function dblClickDiv(event) {
 
     openTaskM();
 
+    // Store the task ID in the modal for the completion handler
+    const modal = document.getElementById("myModal");
+    modal.setAttribute('data-current-task-id', elem.dataset.id);
+    console.log("Modal opened for task ID:", elem.dataset.id);
+
     // Populate modal fields with task data
     $("#label-input").val(elem.dataset.label);
     $("#start_time").val(startISO);
