@@ -24,23 +24,58 @@ def suggest_task_duration():
     """Endpoint for AI-powered task duration suggestions"""
     try:
         data = request.get_json()
+        print(f"AI suggestion request received: {data}")
+
         if not data:
             return jsonify({'error': 'No JSON data provided'}), 400
 
         task_description = data.get('task', '')
         age = data.get('age', 13)
 
+        print(f"Processing AI suggestion for: '{task_description}', age: {age}")
+
         if not task_description:
             return jsonify({'error': 'Task description required'}), 400
 
         # Get enhanced AI suggestion
         suggestion_result = task_ai.get_duration_suggestion(task_description, age)
+        print(f"AI suggestion result: {suggestion_result}")
+
+        if not suggestion_result:
+            # Fallback to basic rule-based suggestion
+            print("AI suggestion failed, using basic fallback")
+            fallback_minutes = 30  # Default
+            if 'practice' in task_description.lower():
+                fallback_minutes = 90
+            elif 'game' in task_description.lower():
+                fallback_minutes = 120
+            elif 'homework' in task_description.lower():
+                fallback_minutes = 45
+
+            suggestion_result = {
+                'suggested_minutes': fallback_minutes,
+                'difficulty': 3,
+                'subject': 'general',
+                'reasoning': 'Basic fallback suggestion',
+                'source': 'fallback',
+                'confidence': 0.5
+            }
 
         return jsonify(suggestion_result)
 
     except Exception as e:
+        print(f"Duration suggestion error: {e}")
         logging.error(f"Duration suggestion error: {e}")
-        return jsonify({'error': 'Failed to get suggestion'}), 500
+
+        # Return a basic fallback even on error
+        return jsonify({
+            'suggested_minutes': 30,
+            'difficulty': 3,
+            'subject': 'general',
+            'reasoning': 'Error fallback - basic suggestion',
+            'source': 'error_fallback',
+            'confidence': 0.3
+        }), 200  # Return 200 instead of 500 so frontend doesn't show error
 
 @app.route('/ai/calculate-points', methods=['POST'])
 def calculate_task_points():
@@ -459,24 +494,37 @@ def sunday():
 
 @app.route('/add_task', methods=['POST'])
 def add_task():
-    task_controller = TaskController()
-    
-    # Retrieve form data
-    label = request.form.get('label')
-    start_time = request.form.get('start_time')
-    end_time = request.form.get('end_time')
-    uid = session["uid"]
-    urgency = request.form.get('urgency')
-    save_task = request.form.get('save_task')
+    try:
+        task_controller = TaskController()
 
-    # Add the task and get the task data
-    task_data = task_controller.add_task(uid, label, start_time, end_time, urgency, save_task)
-    
-    # Prepare the response
-    response = task_data
-    
-    # Return the response as JSON
-    return response
+        # Retrieve form data
+        label = request.form.get('label')
+        start_time = request.form.get('start_time')
+        end_time = request.form.get('end_time')
+        uid = session.get("uid")
+        urgency = request.form.get('urgency')
+        save_task = request.form.get('save_task')
+
+        # Debug logging
+        print(f"Add task request - Label: {label}, Start: {start_time}, End: {end_time}, UID: {uid}, Urgency: {urgency}, Save: {save_task}")
+
+        # Validate required fields
+        if not uid:
+            return jsonify({'error': 'User not logged in'}), 401
+        if not label or not start_time or not end_time:
+            return jsonify({'error': 'Missing required fields'}), 400
+
+        # Add the task and get the task data
+        task_data = task_controller.add_task(uid, label, start_time, end_time, urgency, save_task)
+
+        print(f"Task created successfully: {task_data}")
+
+        # Return the response as JSON
+        return jsonify(task_data)
+
+    except Exception as e:
+        print(f"Error adding task: {e}")
+        return jsonify({'error': str(e)}), 500
 
 
 @app.route('/update_task_text', methods=['POST'])

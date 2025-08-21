@@ -343,29 +343,63 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
     function addTask(event) {
+        // Debug: Check if elements are found
+        console.log("Label input element:", $("input[name='label']"));
+        console.log("Start time input element:", $("input[name='start_time']"));
+        console.log("End time input element:", $("input[name='end_time']"));
+        console.log("Urgency select element:", $("select#urgency"));
+        console.log("Save task checkbox element:", $("input#save_task"));
+
         const start_time = convertToUTC($("input[name='start_time']").val());
         const end_time = convertToUTC($("input[name='end_time']").val());
-    
-        $.post('/add_task', {
-            label: $("input[name='label']").val(),
+        const label = $("input[name='label']").val();
+        const urgency = $("select#urgency").val();
+        const save_task = $("input#save_task").is(":checked") ? 1 : 0;
+
+        // Debug logging with detailed values
+        console.log("Form field values:");
+        console.log("- Label input value:", label);
+        console.log("- Start time input value:", $("input[name='start_time']").val());
+        console.log("- End time input value:", $("input[name='end_time']").val());
+        console.log("- Start time converted:", start_time);
+        console.log("- End time converted:", end_time);
+        console.log("- Urgency:", urgency);
+        console.log("- Save task:", save_task);
+
+        console.log("Adding task with data:", {
+            label: label,
             start_time: start_time,
             end_time: end_time,
-            urgency: $("select#urgency").val(),
-            save_task: $("input#save_task").is(":checked") ? 1 : 0
+            urgency: urgency,
+            save_task: save_task
+        });
+
+        // Validate required fields
+        if (!label || !start_time || !end_time) {
+            alert("Please fill in all required fields (label, start time, end time)");
+            return;
+        }
+
+        $.post('/add_task', {
+            label: label,
+            start_time: start_time,
+            end_time: end_time,
+            urgency: urgency,
+            save_task: save_task
         }, function(response) {
             if ($("input#save_task").is(":checked")) {
                 let routines = localStorage.getItem("routines") ? parseInt(localStorage.getItem("routines")) : 0;
                 localStorage.setItem("routines", routines + 1);
             }
 
-            console.log("Raw server response:", response);
-    
-            if (response.id && response.label && response.start_time && response.end_time) {
-                taskCount++;
-                add_taskDiv(response, taskCount - 1);
-            } else {
-                console.error("Failed to add task: Missing required response properties");
-            }
+            console.log("Task added successfully:", response);
+
+            // Reload page immediately (consistent with removeTask/completeTask)
+            window.location.reload();
+        }).fail(function(xhr, status, error) {
+            console.error("Failed to add task:", error);
+            console.error("Response:", xhr.responseText);
+            alert("Failed to add task. Please try again.");
         });
     }
 
@@ -1015,13 +1049,64 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     /**
-     * Convert a datetime-local input value to a UTC timestamp
-     * @param {string} localTime - The datetime-local input value (e.g., "2025-03-31T16:02")
+     * Convert a Flatpickr formatted time to a UTC timestamp
+     * @param {string} localTime - The Flatpickr formatted time (e.g., "8/21--12:00 PM" or "2025-03-31T16:02")
      * @return {number} - The UTC timestamp in seconds
      */
     function convertToUTC(localTime) {
-        const localDate = new Date(localTime); // Parse the input as local time
-        return localDate.getTime() / 1000; // Convert to Unix timestamp in seconds
+        if (!localTime) {
+            console.error("convertToUTC: No time provided");
+            return NaN;
+        }
+
+        console.log("Converting time:", localTime);
+
+        // Handle Flatpickr format: "8/21--12:00 PM"
+        if (localTime.includes('--')) {
+            const [datePart, timePart] = localTime.split('--');
+            const [month, day] = datePart.split('/');
+            const currentYear = new Date().getFullYear();
+
+            // Validate the time part
+            console.log("Time part to parse:", timePart);
+
+            // Check for invalid formats like "15:49 PM"
+            const timeMatch = timePart.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i);
+            if (!timeMatch) {
+                console.error("Invalid time format:", timePart);
+                return NaN;
+            }
+
+            let [, hours, minutes, ampm] = timeMatch;
+            hours = parseInt(hours);
+            minutes = parseInt(minutes);
+
+            // Validate hour range for 12-hour format
+            if (hours < 1 || hours > 12) {
+                console.error("Invalid hour for 12-hour format:", hours);
+                return NaN;
+            }
+
+            // Convert to standard format: "8/21/2025 12:00 PM"
+            const standardFormat = `${month}/${day}/${currentYear} ${hours}:${minutes.toString().padStart(2, '0')} ${ampm.toUpperCase()}`;
+            console.log("Converted to standard format:", standardFormat);
+
+            const localDate = new Date(standardFormat);
+            if (isNaN(localDate.getTime())) {
+                console.error("Failed to parse date:", standardFormat);
+                return NaN;
+            }
+
+            const timestamp = localDate.getTime() / 1000;
+            console.log("Final timestamp:", timestamp);
+            return timestamp;
+        }
+
+        // Handle standard datetime-local format: "2025-03-31T16:02"
+        const localDate = new Date(localTime);
+        const timestamp = localDate.getTime() / 1000;
+        console.log("Standard format timestamp:", timestamp);
+        return timestamp;
     }
 
     function add_taskDiv(date, i) {
@@ -1276,30 +1361,20 @@ document.addEventListener('DOMContentLoaded', function() {
         group.addEventListener('click', function (event) {
             console.log("Click event triggered on .task-input-group"); // Debugging log
 
-            // Check if the click is directly on an input
-            if (event.target.tagName === 'INPUT' && event.target.type === 'datetime-local') {
-                console.log("Direct click on input:", event.target.id); // Debugging log
-                event.target.focus(); // Focus the clicked input
-                try {
-                    event.target.showPicker(); // Use showPicker() if supported
-                } catch (e) {
-                    console.warn("showPicker() is not supported in this browser.");
-                }
+            // Check if the click is directly on a text input (Flatpickr)
+            if (event.target.tagName === 'INPUT' && event.target.type === 'text' && event.target.classList.contains('datetime-input')) {
+                console.log("Direct click on datetime input:", event.target.id); // Debugging log
+                event.target.focus(); // Focus the clicked input (Flatpickr will handle opening)
                 return;
             }
 
-            // If the click is not directly on an input, find the closest input
-            const input = event.target.closest('.task-input-group').querySelector('input[type="datetime-local"]');
+            // If the click is not directly on an input, find the closest datetime input
+            const input = event.target.closest('.task-input-group').querySelector('input.datetime-input');
             if (input) {
                 console.log("Opening calendar for:", input.id); // Debugging log
-                input.focus(); // Focus the input
-                try {
-                    input.showPicker(); // Use showPicker() if supported
-                } catch (e) {
-                    console.warn("showPicker() is not supported in this browser.");
-                }
+                input.focus(); // Focus the input (Flatpickr will handle opening)
             } else {
-                console.error("No datetime-local input found inside the group.");
+                console.log("No datetime input found inside the group.");
             }
         });
     });

@@ -243,14 +243,14 @@
         <script>
             flatpickr("#start_time", {
                 enableTime: true,
-                dateFormat: "n/j--H:i K",  // Format: 8/21--12:45 PM
+                dateFormat: "n/j--h:i K",  // Format: 8/21--3:45 PM (h = 12-hour format)
                 theme: "dark",
                 time_24hr: false  // Use 12-hour format with AM/PM
             });
 
             flatpickr("#end_time", {
                 enableTime: true,
-                dateFormat: "n/j--H:i K",  // Format: 8/21--12:45 PM
+                dateFormat: "n/j--h:i K",  // Format: 8/21--3:45 PM (h = 12-hour format)
                 theme: "dark",
                 time_24hr: false  // Use 12-hour format with AM/PM
             });

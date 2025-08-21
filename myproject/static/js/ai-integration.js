@@ -12,6 +12,8 @@ class TaskAI {
 
         try {
             this.isLoading = true;
+            console.log('Requesting AI suggestion for:', taskDescription);
+
             const response = await fetch('/ai/suggest-duration', {
                 method: 'POST',
                 headers: {
@@ -23,14 +25,20 @@ class TaskAI {
                 })
             });
 
+            console.log('AI suggestion response status:', response.status);
+
             if (!response.ok) {
-                throw new Error('Failed to get AI suggestion');
+                const errorText = await response.text();
+                console.error('AI suggestion failed:', errorText);
+                throw new Error(`Failed to get AI suggestion: ${response.status}`);
             }
 
             const result = await response.json();
+            console.log('AI suggestion result:', result);
             return result;
         } catch (error) {
             console.error('AI Duration Suggestion Error:', error);
+            console.error('Error details:', error.message);
             return null;
         } finally {
             this.isLoading = false;
@@ -90,8 +98,7 @@ class TaskAI {
                 <div class="ai-icon">🤖</div>
                 <div class="ai-text">
                     <strong>AI Suggestion:</strong> ${suggestion.suggested_minutes} minutes
-                    <br><small>${suggestion.reasoning}</small>
-                    <br><small>Difficulty: ${suggestion.difficulty}/5 | Subject: ${suggestion.subject}</small>
+                    <br><small>Subject: ${suggestion.subject}</small>
                 </div>
                 <button class="ai-accept-btn" onclick="taskAI.acceptSuggestion(${suggestion.suggested_minutes})">
                     Use This
@@ -127,41 +134,55 @@ class TaskAI {
             // Get the current start time or set to now if empty
             let startTime;
             if (startTimeInput.value) {
-                // Parse the existing start time (Flatpickr format: "Y-m-d H:i")
-                startTime = new Date(startTimeInput.value.replace(' ', 'T'));
+                // Parse the existing start time (handle both formats)
+                if (startTimeInput.value.includes('--')) {
+                    // Flatpickr format: "8/21--12:00 PM"
+                    const [datePart, timePart] = startTimeInput.value.split('--');
+                    const [month, day] = datePart.split('/');
+                    const currentYear = new Date().getFullYear();
+                    const standardFormat = `${month}/${day}/${currentYear} ${timePart}`;
+                    startTime = new Date(standardFormat);
+                } else {
+                    // Standard format: "2025-08-21 12:00"
+                    startTime = new Date(startTimeInput.value.replace(' ', 'T'));
+                }
             } else {
                 // If no start time set, use current time
                 startTime = new Date();
-                // Set start time in Flatpickr format
-                const startTimeString = startTime.getFullYear() + '-' +
-                    String(startTime.getMonth() + 1).padStart(2, '0') + '-' +
-                    String(startTime.getDate()).padStart(2, '0') + ' ' +
-                    String(startTime.getHours()).padStart(2, '0') + ':' +
-                    String(startTime.getMinutes()).padStart(2, '0');
-                startTimeInput.value = startTimeString;
-
-                // Update Flatpickr instance if it exists
-                if (startTimeInput._flatpickr) {
-                    startTimeInput._flatpickr.setDate(startTime);
-                }
             }
 
             // Calculate end time by adding suggested minutes
             const endTime = new Date(startTime.getTime() + (minutes * 60000));
 
-            // Format end time for Flatpickr (Y-m-d H:i format)
-            const endTimeString = endTime.getFullYear() + '-' +
-                String(endTime.getMonth() + 1).padStart(2, '0') + '-' +
-                String(endTime.getDate()).padStart(2, '0') + ' ' +
-                String(endTime.getHours()).padStart(2, '0') + ':' +
-                String(endTime.getMinutes()).padStart(2, '0');
+            console.log("AI Suggestion Debug:");
+            console.log("- Start time object:", startTime);
+            console.log("- End time object:", endTime);
+            console.log("- Start time hours:", startTime.getHours());
+            console.log("- End time hours:", endTime.getHours());
 
-            // Set the end time value
-            endTimeInput.value = endTimeString;
+            // Use Flatpickr to set the dates (this will format them correctly)
+            if (startTimeInput._flatpickr) {
+                console.log("Using Flatpickr setDate for start time");
+                startTimeInput._flatpickr.setDate(startTime);
+                console.log("Start time value after Flatpickr:", startTimeInput.value);
+            } else {
+                // Fallback: format manually in Flatpickr format (n/j--H:i K)
+                console.log("Using manual formatting for start time");
+                const startFormatted = this.formatDateForFlatpickr(startTime);
+                console.log("Start time manually formatted:", startFormatted);
+                startTimeInput.value = startFormatted;
+            }
 
-            // Update Flatpickr instance if it exists
             if (endTimeInput._flatpickr) {
+                console.log("Using Flatpickr setDate for end time");
                 endTimeInput._flatpickr.setDate(endTime);
+                console.log("End time value after Flatpickr:", endTimeInput.value);
+            } else {
+                // Fallback: format manually in Flatpickr format (n/j--H:i K)
+                console.log("Using manual formatting for end time");
+                const endFormatted = this.formatDateForFlatpickr(endTime);
+                console.log("End time manually formatted:", endFormatted);
+                endTimeInput.value = endFormatted;
             }
 
             // Visual feedback
@@ -186,6 +207,23 @@ class TaskAI {
         }
 
         this.dismissSuggestion();
+    }
+
+    // Helper function to format date in Flatpickr format (n/j--H:i K)
+    formatDateForFlatpickr(date) {
+        const month = date.getMonth() + 1; // 1-12
+        const day = date.getDate(); // 1-31
+        let hours = date.getHours(); // 0-23
+        const minutes = String(date.getMinutes()).padStart(2, '0');
+
+        // Convert to 12-hour format
+        const ampm = hours >= 12 ? 'PM' : 'AM';
+        hours = hours % 12;
+        hours = hours ? hours : 12; // 0 should be 12
+        const hoursStr = String(hours); // Don't pad with zero for Flatpickr format
+
+        console.log(`Formatting date: ${date} -> ${month}/${day}--${hoursStr}:${minutes} ${ampm}`);
+        return `${month}/${day}--${hoursStr}:${minutes} ${ampm}`;
     }
 
     // Dismiss AI suggestion
