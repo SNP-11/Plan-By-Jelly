@@ -1,0 +1,948 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Jelly | Make Time Management Fun</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: linear-gradient(135deg, #0f0f23 0%, #1a0b2e 25%, #16213e 50%, #0f3460 75%, #533a71 100%);
+      min-height: 100vh;
+      color: #e4e4e7;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    /* Enhanced animated background grid with purple tint */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-image: 
+        linear-gradient(rgba(147, 51, 234, 0.08) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(147, 51, 234, 0.08) 1px, transparent 1px);
+      background-size: 60px 60px;
+      pointer-events: none;
+      z-index: -1;
+      animation: gridMove 20s linear infinite;
+    }
+
+    @keyframes gridMove {
+      0% { transform: translate(0, 0); }
+      100% { transform: translate(60px, 60px); }
+    }
+
+    /* Header */
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px 5%;
+      position: relative;
+      backdrop-filter: blur(15px);
+      border-bottom: 1px solid rgba(147, 51, 234, 0.2);
+      background: rgba(15, 15, 35, 0.3);
+    }
+
+    .logo {
+      font-size: 32px;
+      font-weight: 800;
+      background: linear-gradient(135deg, #9333ea, #3b82f6, #06b6d4);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      letter-spacing: -0.02em;
+    }
+
+    nav {
+      display: flex;
+      gap: 2.5rem;
+    }
+
+    nav a {
+      color: #a5b4fc;
+      text-decoration: none;
+      font-size: 15px;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      position: relative;
+    }
+
+    nav a:hover {
+      color: #e0e7ff;
+      transform: translateY(-2px);
+    }
+
+    nav a::after {
+      content: '';
+      position: absolute;
+      bottom: -4px;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(135deg, #9333ea, #3b82f6);
+      transform: scaleX(0);
+      transition: transform 0.3s ease;
+    }
+
+    nav a:hover::after {
+      transform: scaleX(1);
+    }
+
+    .auth {
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+    }
+
+    .auth a {
+      padding: 12px 24px;
+      border-radius: 12px;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 14px;
+      transition: all 0.3s ease;
+      border: 1px solid transparent;
+    }
+
+    .auth .login {
+      color: #a5b4fc;
+      border-color: rgba(147, 51, 234, 0.3);
+      background: rgba(15, 15, 35, 0.3);
+    }
+
+    .auth .login:hover {
+      color: #e0e7ff;
+      background: rgba(147, 51, 234, 0.1);
+      border-color: rgba(147, 51, 234, 0.5);
+    }
+
+    .auth .signup {
+      background: linear-gradient(135deg, #9333ea, #3b82f6);
+      color: white;
+      box-shadow: 0 8px 25px rgba(147, 51, 234, 0.4);
+    }
+
+    .auth .signup:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 35px rgba(147, 51, 234, 0.6);
+    }
+
+    /* Hero Section */
+    .hero {
+      text-align: center;
+      padding: 120px 5% 140px;
+      position: relative;
+      background: radial-gradient(circle at 30% 20%, rgba(147, 51, 234, 0.15) 0%, transparent 50%),
+                  radial-gradient(circle at 70% 80%, rgba(59, 130, 246, 0.1) 0%, transparent 50%);
+    }
+
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: conic-gradient(from 45deg, transparent, rgba(147, 51, 234, 0.15), transparent, rgba(59, 130, 246, 0.1), transparent);
+      animation: rotate 25s linear infinite;
+      z-index: -1;
+    }
+
+    @keyframes rotate {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    .hero h1 {
+      font-size: clamp(48px, 8vw, 76px);
+      font-weight: 900;
+      margin-bottom: 28px;
+      background: linear-gradient(135deg, #ffffff, #e0e7ff, #a5b4fc);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      letter-spacing: -0.03em;
+      line-height: 1.1;
+    }
+
+    .hero p {
+      font-size: 22px;
+      margin-bottom: 50px;
+      color: #a5b4fc;
+      max-width: 650px;
+      margin-left: auto;
+      margin-right: auto;
+      font-weight: 400;
+    }
+
+    .cta-buttons {
+      display: flex;
+      gap: 1.5rem;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-bottom: 100px;
+    }
+
+    .cta-buttons a {
+      padding: 16px 36px;
+      border-radius: 16px;
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 16px;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .cta-buttons .primary {
+      background: linear-gradient(135deg, #9333ea, #3b82f6);
+      color: white;
+      box-shadow: 0 10px 35px rgba(147, 51, 234, 0.4);
+    }
+
+    .cta-buttons .primary:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 15px 50px rgba(147, 51, 234, 0.6);
+    }
+
+    .cta-buttons .secondary {
+      color: #e0e7ff;
+      border: 2px solid rgba(147, 51, 234, 0.3);
+      background: rgba(15, 15, 35, 0.4);
+      backdrop-filter: blur(15px);
+    }
+
+    .cta-buttons .secondary:hover {
+      background: rgba(147, 51, 234, 0.1);
+      border-color: rgba(147, 51, 234, 0.5);
+      transform: translateY(-2px);
+    }
+
+    /* App Preview */
+    .app-preview {
+      display: flex;
+      justify-content: center;
+      position: relative;
+    }
+
+    .preview-container {
+      position: relative;
+      max-width: 800px;
+      width: 100%;
+    }
+
+    .app-image {
+        max-width: 845px;       /* max width of container */
+        max-height: 600px;      /* max height of container */
+        width: auto;            /* let width shrink */
+        height: auto;           /* let height shrink */
+        background: linear-gradient(135deg, rgba(15,15,35,0.9), rgba(26,11,46,0.8));
+        border: 2px solid rgb(167, 108, 222);
+        border-radius: 12px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 2px;           /* optional padding */
+    }
+
+    .app-image img {
+        width: 100%;
+        height: auto;
+        object-fit: contain;     /* scales the whole image inside the container */
+    }
+
+    .app-image-icon {
+      font-size: 72px;
+      background: linear-gradient(135deg, #9333ea, #3b82f6);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-12px); }
+    }
+
+    /* About Section */
+    .about-section {
+      padding: 140px 5%;
+      background: linear-gradient(135deg, rgba(15, 15, 35, 0.5), rgba(26, 11, 46, 0.3));
+      backdrop-filter: blur(15px);
+      border-top: 1px solid rgba(147, 51, 234, 0.2);
+    }
+
+    .about-content {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 100px;
+      align-items: center;
+    }
+
+    .about-text h2 {
+      font-size: clamp(36px, 5vw, 52px);
+      font-weight: 800;
+      margin-bottom: 28px;
+      background: linear-gradient(135deg, #ffffff, #e0e7ff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      letter-spacing: -0.02em;
+    }
+
+    .about-text p {
+      font-size: 18px;
+      color: #a5b4fc;
+      margin-bottom: 28px;
+      line-height: 1.8;
+      font-weight: 400;
+    }
+
+    .about-stats {
+      display: flex;
+      flex-direction: column;
+      gap: 28px;
+    }
+
+    .stat-card {
+      background: linear-gradient(135deg, rgba(15, 15, 35, 0.6), rgba(26, 11, 46, 0.4));
+      border: 2px solid rgba(147, 51, 234, 0.2);
+      border-radius: 20px;
+      padding: 28px;
+      backdrop-filter: blur(15px);
+      transition: all 0.3s ease;
+      text-align: center;
+    }
+
+    .stat-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 20px 50px rgba(147, 51, 234, 0.2);
+      border-color: rgba(147, 51, 234, 0.4);
+    }
+
+    .stat-number {
+      font-size: 36px;
+      font-weight: 800;
+      background: linear-gradient(135deg, #9333ea, #3b82f6);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 12px;
+    }
+
+    .stat-label {
+      color: #a5b4fc;
+      font-size: 15px;
+      font-weight: 600;
+    }
+
+    /* Features Section */
+    .features-section {
+      padding: 140px 5%;
+      position: relative;
+    }
+
+    .features-section h2 {
+      font-size: clamp(36px, 6vw, 52px);
+      font-weight: 800;
+      text-align: center;
+      margin-bottom: 24px;
+      background: linear-gradient(135deg, #ffffff, #e0e7ff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      letter-spacing: -0.02em;
+    }
+
+    .features-subtitle {
+      text-align: center;
+      font-size: 20px;
+      color: #a5b4fc;
+      margin-bottom: 100px;
+      max-width: 650px;
+      margin-left: auto;
+      margin-right: auto;
+      font-weight: 400;
+    }
+
+    .features {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 2.5rem;
+      max-width: 1300px;
+      margin: 0 auto;
+    }
+
+    .feature-card {
+      background: linear-gradient(135deg, rgba(15, 15, 35, 0.6), rgba(26, 11, 46, 0.4));
+      border: 2px solid rgba(147, 51, 234, 0.2);
+      border-radius: 20px;
+      padding: 36px;
+      backdrop-filter: blur(15px);
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .feature-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, rgba(147, 51, 234, 0.8), transparent);
+      transition: opacity 0.3s ease;
+      opacity: 0;
+    }
+
+    .feature-card:hover {
+      transform: translateY(-10px);
+      box-shadow: 0 25px 70px rgba(147, 51, 234, 0.25);
+      border-color: rgba(147, 51, 234, 0.4);
+    }
+
+    .feature-card:hover::before {
+      opacity: 1;
+    }
+
+    .feature-icon {
+      font-size: 52px;
+      margin-bottom: 24px;
+      display: block;
+    }
+
+    .feature-card h3 {
+      font-size: 22px;
+      font-weight: 700;
+      margin-bottom: 18px;
+      color: #e0e7ff;
+    }
+
+    .feature-card p {
+      color: #a5b4fc;
+      line-height: 1.7;
+      font-size: 16px;
+      font-weight: 400;
+    }
+
+    /* Footer */
+    footer {
+      background: linear-gradient(135deg, rgba(15, 15, 35, 0.9), rgba(26, 11, 46, 0.7));
+      border-top: 2px solid rgba(147, 51, 234, 0.2);
+      padding: 50px 5%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      backdrop-filter: blur(15px);
+    }
+
+    .footer-links {
+      display: flex;
+      gap: 2.5rem;
+    }
+
+    footer a {
+      color: #a5b4fc;
+      text-decoration: none;
+      font-size: 15px;
+      font-weight: 600;
+      transition: color 0.3s ease;
+    }
+
+    footer a:hover {
+      color: #e0e7ff;
+    }
+
+    .copyright {
+      color: #6b7db3;
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      header {
+        padding: 16px 5%;
+        flex-direction: column;
+        gap: 1.5rem;
+      }
+
+      nav {
+        gap: 1.5rem;
+      }
+
+      .hero {
+        padding: 100px 5%;
+      }
+
+      .cta-buttons {
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .cta-buttons a {
+        width: 220px;
+        text-align: center;
+      }
+
+      .features {
+        grid-template-columns: 1fr;
+      }
+
+      footer {
+        flex-direction: column;
+        gap: 1.5rem;
+        text-align: center;
+      }
+
+      .about-content {
+        grid-template-columns: 1fr;
+        gap: 60px;
+      }
+
+      .about-stats {
+        flex-direction: row;
+        justify-content: center;
+        flex-wrap: wrap;
+      }
+
+      .stat-card {
+        flex: 1;
+        min-width: 140px;
+      }
+      .app-image-icon {
+        font-size: 56px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <header>
+    <div class="logo">Jelly</div>
+    <nav>
+      <a href="#">Product</a>
+      <a href="#">Pricing</a>
+      <a href="#about">About</a>
+      <a href="#">Resources</a>
+    </nav>
+    <div class="auth">
+      <a href="/login" class="login">Log In</a>
+      <a href="/signup" class="signup">Sign Up</a>
+    </div>
+  </header>
+
+  <!-- Hero -->
+  <section class="hero">
+    <h1>Make Time Management Fun</h1>
+    <p>Jelly helps middle schoolers stay organized, earn rewards, and build healthy habits—with parent peace of mind.</p>
+    <div class="cta-buttons">
+      <a href="/signup" class="primary">Start Free Trial</a>
+      <a href="#features" class="secondary">How it works?</a>
+    </div>
+    <div class="app-preview">
+    <div class="preview-container">
+        <div class="app-image">
+        <img src="{{ url_for('static', filename='jellyHP.png') }}" alt="Streak Badge">
+        </div>
+    </div>
+    </div>
+
+</div>
+  </section>
+
+  <!-- About Section -->
+  <section id="about" class="about-section">
+    <div class="about-content">
+      <div class="about-text">
+        <h2>About Jelly</h2>
+        <p>Hi! I'm the creator behind Jelly, a passionate developer and parent who understands the unique challenges middle schoolers face with organization and time management.</p>
+        <p>After watching countless students struggle with traditional planners and apps designed for adults, I realized there was a gap in the market for something truly designed for young minds—something that speaks their language and motivates them in ways that actually work.</p>
+        <p>Jelly was born from the belief that learning good habits should be engaging, rewarding, and most importantly, age-appropriate. By combining gamification with proven organizational principles, we're helping the next generation build skills that will serve them for life.</p>
+      </div>
+      <div class="about-stats">
+        <div class="stat-card">
+          <div class="stat-number">2+</div>
+          <div class="stat-label">Years in Development</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number">500+</div>
+          <div class="stat-label">Beta Testers</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number">95%</div>
+          <div class="stat-label">Parent Satisfaction</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number">12-15</div>
+          <div class="stat-label">Target Age Range</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features Section -->
+  <section id="features" class="features-section">
+    <h2 class="gradient-text">Why Jelly is Amazing?</h2>
+    <p class="features-subtitle">Discover the features that make time management engaging and effective for middle schoolers</p>
+    <div class="features">
+      <div class="feature-card">
+        <span class="feature-icon">📅</span>
+        <h3>Smart Calendar</h3>
+        <p>Organize schoolwork and activities in a way that's fun and easy to follow. Visual scheduling that makes sense to young minds.</p>
+      </div>
+      <div class="feature-card">
+        <span class="feature-icon">🏆</span>
+        <h3>Rewards & XP</h3>
+        <p>Complete tasks, earn points, and unlock fun rewards that motivate progress. Gamification that actually works.</p>
+      </div>
+      <div class="feature-card">
+        <span class="feature-icon">🎨</span>
+        <h3>Personalization</h3>
+        <p>Kids can customize their profiles and rewards, making Jelly truly theirs. Express creativity while staying organized.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <p class="copyright">&copy; 2025 Jelly. All rights reserved.</p>
+    <div class="footer-links">
+      <a href="#about">About</a>
+      <a href="#">Contact</a>
+      <a href="#">Privacy</a>
+    </div>
+  </footer>
+
+  <script>
+    // Register ScrollTrigger plugin
+    gsap.registerPlugin(ScrollTrigger);
+
+    // Hero section animations
+    const heroTimeline = gsap.timeline();
+    
+    heroTimeline
+      .to('.hero h1', {
+        opacity: 1,
+        y: 0,
+        duration: 1.2,
+        ease: "power3.out"
+      })
+      .to('.hero p', {
+        opacity: 1,
+        y: 0,
+        duration: 1,
+        ease: "power3.out"
+      }, "-=0.8")
+      .to('.cta-buttons', {
+        opacity: 1,
+        y: 0,
+        duration: 1,
+        ease: "power3.out"
+      }, "-=0.6")
+      .to('.app-preview', {
+        opacity: 1,
+        y: 0,
+        duration: 1.2,
+        ease: "power3.out"
+      }, "-=0.4");
+
+    // Parallax effect for hero background
+    gsap.to('.hero::before', {
+      rotation: 360,
+      duration: 30,
+      repeat: -1,
+      ease: "none"
+    });
+
+    // App image floating with scroll parallax
+    gsap.to('.app-image', {
+      y: -100,
+      ease: "none",
+      scrollTrigger: {
+        trigger: '.app-preview',
+        start: "top bottom",
+        end: "bottom top",
+        scrub: 1
+      }
+    });
+
+    // Staggered feature cards animation
+    gsap.to('.feature-card', {
+      opacity: 1,
+      y: 0,
+      scale: 1,
+      duration: 0.8,
+      stagger: 0.2,
+      ease: "back.out(1.7)",
+      scrollTrigger: {
+        trigger: '.features',
+        start: "top 80%",
+        end: "bottom 20%",
+        toggleActions: "play none none reverse"
+      }
+    });
+
+    // Feature cards hover enhancement with GSAP
+    document.querySelectorAll('.feature-card').forEach(card => {
+      card.addEventListener('mouseenter', () => {
+        gsap.to(card, {
+          scale: 1.05,
+          y: -15,
+          duration: 0.3,
+          ease: "power2.out"
+        });
+      });
+
+      card.addEventListener('mouseleave', () => {
+        gsap.to(card, {
+          scale: 1,
+          y: 0,
+          duration: 0.3,
+          ease: "power2.out"
+        });
+      });
+    });
+
+    // About section slide in animations
+    gsap.to('.about-text', {
+      opacity: 1,
+      x: 0,
+      duration: 1,
+      ease: "power3.out",
+      scrollTrigger: {
+        trigger: '.about-section',
+        start: "top 70%",
+        toggleActions: "play none none reverse"
+      }
+    });
+
+    gsap.to('.about-image', {
+      opacity: 1,
+      y: 0,
+      scale: 1,
+      duration: 1.2,
+      delay: 0.2,
+      ease: "back.out(1.7)",
+      scrollTrigger: {
+        trigger: '.about-section',
+        start: "top 70%",
+        toggleActions: "play none none reverse"
+      }
+    });
+
+    gsap.to('.about-stats', {
+      opacity: 1,
+      x: 0,
+      duration: 1,
+      delay: 0.4,
+      ease: "power3.out",
+      scrollTrigger: {
+        trigger: '.about-section',
+        start: "top 70%",
+        toggleActions: "play none none reverse"
+      }
+    });
+
+    // Creator image hover effect
+    document.querySelector('.creator-image').addEventListener('mouseenter', () => {
+      gsap.to('.creator-image', {
+        scale: 1.1,
+        y: -15,
+        rotation: 2,
+        duration: 0.4,
+        ease: "power2.out"
+      });
+    });
+
+    document.querySelector('.creator-image').addEventListener('mouseleave', () => {
+      gsap.to('.creator-image', {
+        scale: 1,
+        y: 0,
+        rotation: 0,
+        duration: 0.4,
+        ease: "power2.out"
+      });
+    });
+
+    // Stat cards staggered animation
+    gsap.to('.stat-card', {
+      opacity: 1,
+      y: 0,
+      rotation: 0,
+      duration: 0.6,
+      stagger: 0.15,
+      ease: "back.out(1.7)",
+      scrollTrigger: {
+        trigger: '.about-stats',
+        start: "top 80%",
+        toggleActions: "play none none reverse"
+      }
+    });
+
+    // Stat cards hover effect
+    document.querySelectorAll('.stat-card').forEach(card => {
+      card.addEventListener('mouseenter', () => {
+        gsap.to(card, {
+          scale: 1.08,
+          y: -10,
+          rotation: -2,
+          duration: 0.3,
+          ease: "power2.out"
+        });
+      });
+
+      card.addEventListener('mouseleave', () => {
+        gsap.to(card, {
+          scale: 1,
+          y: 0,
+          rotation: 0,
+          duration: 0.3,
+          ease: "power2.out"
+        });
+      });
+    });
+
+    // Continuous parallax for grid background
+    gsap.to('body::before', {
+      backgroundPosition: "100px 100px",
+      duration: 20,
+      repeat: -1,
+      ease: "none"
+    });
+
+    // Header hide/show on scroll
+    let lastScroll = 0;
+    
+    ScrollTrigger.create({
+      start: 0,
+      end: "max",
+      onUpdate: (self) => {
+        const currentScroll = self.scroll();
+        
+        if (currentScroll > lastScroll && currentScroll > 100) {
+          // Scrolling down
+          gsap.to('header', {
+            y: -100,
+            duration: 0.3,
+            ease: "power2.out"
+          });
+        } else {
+          // Scrolling up
+          gsap.to('header', {
+            y: 0,
+            duration: 0.3,
+            ease: "power2.out"
+          });
+        }
+        
+        lastScroll = currentScroll;
+      }
+    });
+
+    // CTA buttons enhanced animations
+    document.querySelectorAll('.cta-buttons a').forEach(button => {
+      button.addEventListener('mouseenter', () => {
+        gsap.to(button, {
+          scale: 1.1,
+          y: -5,
+          duration: 0.3,
+          ease: "power2.out"
+        });
+      });
+
+      button.addEventListener('mouseleave', () => {
+        gsap.to(button, {
+          scale: 1,
+          y: 0,
+          duration: 0.3,
+          ease: "power2.out"
+        });
+      });
+    });
+
+    // Smooth scroll reveal for sections
+    gsap.utils.toArray('section').forEach(section => {
+      gsap.fromTo(section, 
+        {
+          opacity: 0.7,
+          scale: 0.95
+        },
+        {
+          opacity: 1,
+          scale: 1,
+          duration: 1,
+          ease: "power2.out",
+          scrollTrigger: {
+            trigger: section,
+            start: "top 85%",
+            end: "top 15%",
+            scrub: 1
+          }
+        }
+      );
+    });
+
+    // Text reveal animation for headings
+    gsap.utils.toArray('h2').forEach(heading => {
+      gsap.fromTo(heading,
+        {
+          opacity: 0,
+          y: 50,
+          scale: 0.9
+        },
+        {
+          opacity: 1,
+          y: 0,
+          scale: 1,
+          duration: 1,
+          ease: "power3.out",
+          scrollTrigger: {
+            trigger: heading,
+            start: "top 80%",
+            toggleActions: "play none none reverse"
+          }
+        }
+      );
+    });
+
+    // Footer slide up animation
+    gsap.fromTo('footer',
+      {
+        opacity: 0,
+        y: 100
+      },
+      {
+        opacity: 1,
+        y: 0,
+        duration: 1,
+        ease: "power3.out",
+        scrollTrigger: {
+          trigger: 'footer',
+          start: "top 90%",
+          toggleActions: "play none none reverse"
+        }
+      }
+    );
+
+    // Refresh ScrollTrigger on window resize
+    window.addEventListener('resize', () => {
+      ScrollTrigger.refresh();
+    });
+  </script>
+</body>
+</html>

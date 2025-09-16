@@ -1,22 +1,48 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sign Up Page</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/signup.css') }}">
 </head>
+    <style>
+        .input-container {
+            width: 600px;
+        }
+    </style>
 <body>
     <div class="container">
         <div class="content">
             <h1>Create a New Account</h1>
             <form action="{{ url_for('signup') }}" method="post">
-                <input type="text" id="username" name="username" placeholder="username" required>
-                <input type="password" id="password" name="password" placeholder="password" required>
+                <div class="input-container">
+                    <input type="text" id="username" name="username" placeholder="username" required>
+                </div>
+                <div class="input-container" style="position: relative;">
+                    <input type="password" id="password" name="password" placeholder="password" required>
+                    <i class="fa-solid fa-eye-slash" id="togglePassword" style="position: absolute; right: 65px; top: 50%; transform: translateY(-50%); cursor: pointer;"></i>
+                </div>
                 <input type="submit" value="Sign Up">
             </form>
         </div>
     </div>
+    <script>
+        const togglePassword = document.getElementById("togglePassword");
+        const password = document.getElementById("password");
+
+        togglePassword.addEventListener("click", function () {
+            // Toggle the type attribute
+            const type = password.getAttribute("type") === "password" ? "text" : "password";
+            password.setAttribute("type", type);
+
+            // Toggle the eye / eye-slash icon
+            this.classList.toggle("fa-eye-slash");
+            this.classList.toggle("fa-eye");
+            
+        });
+    </script>
 </body>
 </html>
 

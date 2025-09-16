@@ -1,10 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fixed Hamburger and Spacing</title>
+    <title>Sidebar Toggle</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -12,37 +11,46 @@
         body {
             background-color: #121212;
             margin: 0;
-            padding: 25px; /* 25px distance all around */
+            padding: 25px;
             overflow-x: hidden;
             font-family: "Poppins", sans-serif;
             display: flex;
             justify-content: center;
             align-items: center;
-            height: calc(100vh - 50px); /* Reduce 50px for top/bottom padding */
+            height: calc(100vh - 50px);
         }
 
         /* Main container */
         .main-container {
             display: flex;
-            height: calc(100vh - 50px); /* Reduce height for 25px padding top and bottom */
-            width: calc(100vw - 50px);  /* Reduce width for 25px padding left and right */
-            gap: 15px; /* 15px distance between sidebar and main content */
+            height: calc(100vh - 50px);
+            width: calc(100vw - 50px);
+            gap: 15px;
             box-sizing: border-box;
         }
 
-        /* Sidebar */
+        /* Sidebar (starts closed) */
         .side-menu {
             background-color: rgba(255, 198, 76, 0.85);
             width: 250px;
-            border-radius: 15px;
-            overflow-x: hidden;
+            height: 100vh;
+            position: fixed;
+            left: -250px; /* Hidden initially */
+            top: 0;
+            border-radius: 0 15px 15px 0;
             padding-top: 60px;
             padding-left: 15px;
             padding-right: 15px;
             box-shadow: 2px 0 5px rgba(0, 0, 0, 0.5);
+            transition: left 0.3s ease-in-out;
         }
 
-        /* Links inside the sidebar */
+        /* Show sidebar when open */
+        .side-menu.open {
+            left: 0;
+        }
+
+        /* Sidebar links */
         .side-menu a {
             padding: 15px 0;
             text-decoration: none;
@@ -57,7 +65,7 @@
             background-color: rgba(255, 255, 255, 0.1);
         }
 
-        /* Button to open/close the sidebar (fixed in place) */
+        /* Toggle button */
         .toggle-btn {
             font-size: 24px;
             font-weight: bold;
@@ -66,23 +74,37 @@
             padding: 10px 15px;
             border-radius: 10px;
             background-color: rgb(62, 79, 226);
-            position: fixed; /* Fix the button in place */
+            position: fixed;
             top: 30px;
             left: 30px;
             z-index: 3;
+            border: none;
         }
 
-        /* Main content area */
+        /* Main content */
         .main-content {
-            flex-grow: 1; /* Fill remaining space */
+            flex-grow: 1;
             background-color: #1c1c1c;
             border-radius: 15px;
             padding: 30px;
             color: #fff;
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+            margin-left: 0;
+            transition: margin-left 0.3s ease-in-out;
         }
 
+        /* Move content when sidebar opens */
+        .content-shift {
+            margin-left: 250px;
+        }
+
+        /* Responsive adjustments */
         @media (max-width: 768px) {
+            .side-menu {
+                width: 200px;
+                left: -200px; /* Ensure it starts hidden */
+            }
+
             .side-menu a {
                 font-size: 20px;
             }
@@ -90,12 +112,15 @@
             .toggle-btn {
                 font-size: 20px;
             }
+
+            .content-shift {
+                margin-left: 200px;
+            }
         }
     </style>
 </head>
-
 <body>
-    <button id="toggleButton" class="toggle-btn" onclick="toggleMenu()">&#9776;</button>
+    <button id="toggleButton" class="toggle-btn">&#9776;</button>
 
     <div id="container" class="main-container">
         <div id="sideMenu" class="side-menu">
@@ -111,24 +136,16 @@
     </div>
 
     <script>
-        let isMenuOpen = true;
-
-        function toggleMenu() {
+        document.getElementById("toggleButton").addEventListener("click", function() {
             const sideMenu = document.getElementById("sideMenu");
             const mainContent = document.getElementById("mainContent");
-            const toggleButton = document.getElementById("toggleButton");
+            const isOpen = sideMenu.classList.contains("open");
 
-            if (isMenuOpen) {
-                sideMenu.style.display = "none"; // Hide sidebar
-                toggleButton.innerHTML = "&#9776;"; // Change icon to hamburger
-            } else {
-                sideMenu.style.display = "block"; // Show sidebar
-                // toggleButton.innerHTML = "&times;"; // Change icon to close
-            }
+            sideMenu.classList.toggle("open");
+            mainContent.classList.toggle("content-shift");
 
-            isMenuOpen = !isMenuOpen; // Toggle the state
-        }
+            this.innerHTML = isOpen ? "&#9776;" : "&times;"; // Properly toggles icon
+        });
     </script>
 </body>
-
 </html>

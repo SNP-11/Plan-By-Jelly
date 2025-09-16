@@ -29,6 +29,7 @@ document.addEventListener('DOMContentLoaded', function() {
             start_time: $("input['start_time']"),
             end_time: $("input['end_time']"),
             urgency: $("select#urgency"),
+            save_task: $("input#save_task").is(":checked") == True ? 1 : 0
         }, function(response){
             alert(response)
         });
