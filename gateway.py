@@ -241,20 +241,20 @@ def get_task_insights():
     try:
         if 'uid' not in session:
             return jsonify({'error': 'User not logged in'}), 401
-            
+
         uid = session['uid']
-        
+
         # Query your database for user's completed tasks
         with get_db_connection() as conn:
             cursor = conn.cursor()
             cursor.execute('''
-                SELECT * FROM tasks 
-                WHERE uid = ? 
-                ORDER BY end_time DESC 
+                SELECT * FROM tasks
+                WHERE uid = ?
+                ORDER BY end_time DESC
                 LIMIT 50
             ''', (uid,))
             completed_tasks = cursor.fetchall()
-        
+
         # Convert to list of dictionaries for easier processing
         tasks_data = []
         for task in completed_tasks:
@@ -267,10 +267,10 @@ def get_task_insights():
                 'urgency': task[5],
                 'save_task': task[6]
             })
-        
+
         insights = analyze_task_patterns(tasks_data)
         return jsonify(insights)
-        
+
     except Exception as e:
         logging.error(f"Task insights error: {e}")
         return jsonify({'error': 'Failed to generate insights'}), 500
@@ -284,22 +284,22 @@ def analyze_task_patterns(completed_tasks):
             'average_time_accuracy': 0,
             'recommendations': ['Start completing tasks to get personalized insights!']
         }
-    
+
     total_tasks = len(completed_tasks)
-    
+
     # Basic analysis
     urgent_tasks = sum(1 for task in completed_tasks if task.get('urgency') == 'high')
-    
+
     # Subject categorization
     subject_counts = {}
     for task in completed_tasks:
         subject = categorize_task(task.get('label', ''))
         subject_counts[subject] = subject_counts.get(subject, 0) + 1
-    
+
     most_common_subject = max(subject_counts.keys(), default='general') if subject_counts else 'general'
-    
+
     recommendations = generate_recommendations(total_tasks, urgent_tasks, most_common_subject)
-    
+
     insights = {
         'total_tasks_completed': total_tasks,
         'most_common_subject': most_common_subject,
@@ -307,16 +307,16 @@ def analyze_task_patterns(completed_tasks):
         'subject_breakdown': subject_counts,
         'recommendations': recommendations
     }
-    
+
     return insights
 
 def categorize_task(task_label):
     """Categorize tasks by subject/type for analysis"""
     if not task_label:
         return 'other'
-        
+
     task_lower = task_label.lower()
-    
+
     categories = {
         'math': ['math', 'algebra', 'geometry', 'calculus', 'arithmetic'],
         'science': ['science', 'biology', 'chemistry', 'physics'],
@@ -328,17 +328,17 @@ def categorize_task(task_label):
         'chores': ['chores', 'clean', 'organize'],
         'study': ['study', 'review', 'practice', 'homework']
     }
-    
+
     for category, keywords in categories.items():
         if any(keyword in task_lower for keyword in keywords):
             return category
-    
+
     return 'other'
 
 def generate_recommendations(total_tasks, urgent_tasks, most_common_subject):
     """Generate personalized recommendations based on task patterns"""
     recommendations = []
-    
+
     if total_tasks < 5:
         recommendations.append("Keep it up! Complete more tasks to unlock detailed insights.")
         recommendations.append("Try setting specific start and end times for better planning.")
@@ -348,12 +348,12 @@ def generate_recommendations(total_tasks, urgent_tasks, most_common_subject):
     else:
         recommendations.append("Excellent task completion record!")
         recommendations.append("You've developed strong planning skills.")
-    
+
     if urgent_tasks > total_tasks * 0.7:
         recommendations.append("Try to plan ahead to reduce urgent tasks.")
-    
+
     recommendations.append(f"You seem to focus a lot on {most_common_subject} tasks. Great job staying consistent!")
-    
+
     return recommendations
 
 
@@ -384,17 +384,17 @@ def create_db():
                  ''')
     conn.execute('''\
                  CREATE TABLE tasks (
-                    id INTEGER NOT NULL, 
-                    uid INTEGER NOT NULL, 
-                    label VARCHAR(80) NOT NULL, 
-                    start_time INTEGER NOT NULL, 
+                    id INTEGER NOT NULL,
+                    uid INTEGER NOT NULL,
+                    label VARCHAR(80) NOT NULL,
+                    start_time INTEGER NOT NULL,
                     end_time INTEGER,
                     urgency VARCHAR(30) NOT NULL,
                     save_task INTEGER NOT NULL,
                     PRIMARY KEY (id)
                  );\
                  ''')
-    
+
 
     # 1) git managment
     # 2) use alter
@@ -408,7 +408,7 @@ def index():
     db.create_all()
     if 'username' in session:
         return redirect(url_for('home'))
-    return render_template('loginG.html')
+    return render_template('landingPage.html')
 
 @app.route('/test-migration')
 def test_migration():
@@ -417,9 +417,12 @@ def test_migration():
         cursor.execute("PRAGMA table_info(tasks)")
         columns = cursor.fetchall()
         return jsonify([dict(col) for col in columns])
-    
-@app.route('/login', methods=['POST'])
+
+@app.route('/login', methods=['GET', 'POST'])
 def login():
+    if request.method == 'GET':
+        return render_template('loginG.html')
+
     username = request.form['username']
     password = request.form['password']
     print(f"Login attempt - Username: {username}, Password: {password}")
@@ -440,10 +443,10 @@ def login():
             session['uid'] = id
             flash('Login successful!', 'success')
             return redirect(url_for('home'))
-    
+
     # Flash this for any failure (username not found or password mismatch)
     flash('Your username or password was incorrect.', 'danger')
-    return redirect(url_for('index'))
+    return redirect(url_for('login'))
 
 
 
@@ -451,7 +454,7 @@ def login():
 def logout():
     session.pop('username', None)
     flash('You have been logged out.', 'success')
-    return redirect(url_for('index'))
+    return redirect(url_for('login'))
 
 @app.route('/signup', methods=['GET', 'POST'])
 def signup():
@@ -476,7 +479,7 @@ def view_users():
         cursor = conn.cursor()
         cursor.execute('SELECT * FROM users')
         user = cursor.fetchone()
-        #return jsonify(user)  
+        #return jsonify(user)
         return session["uid"]
 
 @app.route('/home')
@@ -540,7 +543,7 @@ def fetch_task_text():
 @app.route('/get_task', methods= ['POST'])
 def get_task():
     task_controller = TaskController()
-    
+
     # Retrieve form data
     id = request.form.get('id')
     task_data = task_controller.get_task_by_id(1, id)
@@ -550,14 +553,14 @@ def get_task():
 @app.route('/get_tasks', methods=['POST'])
 def get_tasks():
     task_controller = TaskController()
-    
+
     # Retrieve tasks by user id
     uid = session["uid"]
     task_data = task_controller.get_tasks_by_uid(uid)
-    
+
     # Print task data to identify any issues
     print(f"Task Data: {task_data}")
-    
+
     try:
         return jsonify(task_data)  # This will throw an error if something is not serializable
     except TypeError as e:
@@ -628,9 +631,9 @@ def calendar():
 @app.route('/timeout')
 def timeout():
     return render_template('timeout.html')
-#0. Make a controller 
-#1. Create a route in this file that accepts data as a POST from new task form 
-#2. Handle Posted Data using alchemy to put the data into the database 
+#0. Make a controller
+#1. Create a route in this file that accepts data as a POST from new task form
+#2. Handle Posted Data using alchemy to put the data into the database
 #3. Resolve the comment by using SELECT in alchemy
 
 @app.route('/reward')

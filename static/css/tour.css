@@ -1,0 +1,371 @@
+/* Tutorial/Tour Styles */
+
+/* Help Button */
+.help-btn {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    color: white;
+    font-size: 24px;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+    transition: all 0.3s ease;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.help-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+}
+
+.help-btn:active {
+    transform: translateY(0);
+}
+
+/* Tour Overlay */
+.tour-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    z-index: 11990;
+    pointer-events: none;
+}
+
+/* Tour Tooltip */
+.tour-tooltip {
+    position: absolute;
+    background: #2c3e50;
+    color: white;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    max-width: 350px;
+    min-width: 280px;
+    z-index: 12010;
+    pointer-events: auto;
+    border: 2px solid #3498db;
+}
+
+.tour-tooltip::before {
+    content: '';
+    position: absolute;
+    width: 0;
+    height: 0;
+    border: 10px solid transparent;
+}
+
+/* Arrow positions */
+.tour-tooltip.arrow-top::before {
+    top: -20px;
+    left: 50%;
+    transform: translateX(-50%);
+    border-bottom-color: #3498db;
+}
+
+.tour-tooltip.arrow-bottom::before {
+    bottom: -20px;
+    left: 50%;
+    transform: translateX(-50%);
+    border-top-color: #3498db;
+}
+
+.tour-tooltip.arrow-left::before {
+    left: -20px;
+    top: 50%;
+    transform: translateY(-50%);
+    border-right-color: #3498db;
+}
+
+.tour-tooltip.arrow-right::before {
+    right: -20px;
+    top: 50%;
+    transform: translateY(-50%);
+    border-left-color: #3498db;
+}
+
+/* Tooltip Content */
+.tour-tooltip h3 {
+    margin: 0 0 10px 0;
+    font-size: 18px;
+    color: #3498db;
+    font-weight: 600;
+}
+
+.tour-tooltip p {
+    margin: 0 0 15px 0;
+    line-height: 1.5;
+    font-size: 14px;
+}
+
+.tour-tooltip .tour-buttons {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 15px;
+}
+
+.tour-tooltip .tour-progress {
+    font-size: 12px;
+    color: #bdc3c7;
+}
+
+.tour-tooltip .tour-nav {
+    display: flex;
+    gap: 10px;
+}
+
+.tour-tooltip button {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.tour-tooltip .tour-prev {
+    background: #7f8c8d;
+    color: white;
+}
+
+.tour-tooltip .tour-prev:hover {
+    background: #95a5a6;
+}
+
+.tour-tooltip .tour-next {
+    background: #3498db;
+    color: white;
+}
+
+.tour-tooltip .tour-next:hover {
+    background: #2980b9;
+}
+
+.tour-tooltip .tour-skip {
+    background: transparent;
+    color: #e74c3c;
+    border: 1px solid #e74c3c;
+}
+
+.tour-tooltip .tour-skip:hover {
+    background: #e74c3c;
+    color: white;
+}
+
+/* Floating highlight ring overlay (no layout shift) */
+.tour-highlight {
+    position: absolute;
+    z-index: 12000;
+    pointer-events: none;
+    border-radius: 12px;
+    box-shadow: 0 0 0 8px rgba(52, 152, 219, 0.55), 0 0 28px rgba(52, 152, 219, 0.55);
+    transition: all 0.15s ease;
+    animation: tourGlow 1.6s ease-in-out infinite;
+}
+
+
+@keyframes tourGlow {
+    0% { box-shadow: 0 0 0 8px rgba(52,152,219,0.55), 0 0 12px rgba(52,152,219,0.4); }
+    50% { box-shadow: 0 0 0 10px rgba(52,152,219,0.35), 0 0 28px rgba(52,152,219,0.65); }
+    100% { box-shadow: 0 0 0 8px rgba(52,152,219,0.55), 0 0 12px rgba(52,152,219,0.4); }
+}
+
+/* Raise the real element above the overlay (no layout shift). Scale is animated via .tour-pop-anim */
+.tour-pop {
+    position: relative;
+    z-index: 12005 !important;
+    will-change: transform;
+    transform-origin: center center;
+}
+
+.tour-pop-anim {
+    animation: tourPopPulse 450ms ease-in-out 1;
+}
+
+@keyframes tourPopPulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.08); }
+    100% { transform: scale(1); }
+}
+
+
+/* Element Elevation (kept for backward compatibility; not used by tour) */
+.tour-elevated {
+    position: relative !important;
+    z-index: 12000 !important;
+    box-shadow: 0 0 0 4px rgba(52, 152, 219, 0.5), 0 8px 32px rgba(0, 0, 0, 0.3) !important;
+    border-radius: 8px !important;
+    transition: all 0.3s ease !important;
+}
+
+/* Pulse animation for highlighted elements */
+.tour-pulse {
+    animation: tourPulse 2s infinite;
+}
+
+@keyframes tourPulse {
+    0% {
+        box-shadow: 0 0 0 4px rgba(52, 152, 219, 0.5), 0 8px 32px rgba(0, 0, 0, 0.3);
+    }
+    50% {
+        box-shadow: 0 0 0 8px rgba(52, 152, 219, 0.3), 0 8px 32px rgba(0, 0, 0, 0.3);
+    }
+    100% {
+        box-shadow: 0 0 0 4px rgba(52, 152, 219, 0.5), 0 8px 32px rgba(0, 0, 0, 0.3);
+    }
+}
+
+/* Welcome Modal */
+.tour-welcome-modal {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: #2c3e50;
+    color: white;
+    padding: 30px;
+    border-radius: 15px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+    max-width: 500px;
+    width: 90%;
+    z-index: 12020;
+    text-align: center;
+    border: 2px solid #3498db;
+}
+
+/* Tiny celebration toast */
+.tour-celebrate {
+    position: fixed;
+    top: 12%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(26,26,26,0.95);
+    color: #fff;
+    padding: 12px 16px;
+    border-radius: 10px;
+    border: 2px solid #ffd166;
+    box-shadow: 0 8px 28px rgba(0,0,0,0.35);
+    z-index: 12030;
+    font-weight: 700;
+    opacity: 0;
+    animation: toastPop 2.2s ease forwards;
+}
+
+@keyframes toastPop {
+    0% { opacity: 0; transform: translateX(-50%) translateY(-8px); }
+    15% { opacity: 1; transform: translateX(-50%) translateY(0); }
+    85% { opacity: 1; }
+    100% { opacity: 0; transform: translateX(-50%) translateY(-6px); }
+}
+
+
+.tour-welcome-modal h2 {
+    color: #3498db;
+    margin-bottom: 15px;
+    font-size: 24px;
+}
+
+.tour-welcome-modal p {
+    margin-bottom: 20px;
+    line-height: 1.6;
+    font-size: 16px;
+}
+
+.tour-welcome-modal .welcome-buttons {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    margin-top: 25px;
+}
+
+.tour-welcome-modal button {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.tour-welcome-modal .start-tour {
+    background: #3498db;
+    color: white;
+}
+
+.tour-welcome-modal .start-tour:hover {
+    background: #2980b9;
+    transform: translateY(-2px);
+}
+
+.tour-welcome-modal .skip-tour {
+    background: transparent;
+    color: #e74c3c;
+    border: 2px solid #e74c3c;
+}
+
+.tour-welcome-modal .skip-tour:hover {
+    background: #e74c3c;
+    color: white;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .tour-tooltip {
+        max-width: 280px;
+        min-width: 250px;
+        padding: 15px;
+    }
+
+    .tour-tooltip h3 {
+        font-size: 16px;
+    }
+
+    .tour-tooltip p {
+        font-size: 13px;
+    }
+
+    .tour-welcome-modal {
+        padding: 20px;
+        max-width: 350px;
+    }
+
+    .tour-welcome-modal h2 {
+        font-size: 20px;
+    }
+
+    .tour-welcome-modal p {
+        font-size: 14px;
+    }
+
+    .help-btn {
+        width: 50px;
+        height: 50px;
+        font-size: 20px;
+        bottom: 15px;
+        right: 15px;
+    }
+}
+
+/* Dark theme adjustments */
+[data-bs-theme="dark"] .tour-tooltip {
+    background: #1a1a1a;
+    border-color: #3498db;
+}
+
+[data-bs-theme="dark"] .tour-welcome-modal {
+    background: #1a1a1a;
+    border-color: #3498db;
+}
